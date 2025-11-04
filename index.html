@@ -155,143 +155,113 @@
       attachListeners();
     });
 
-    function loadWorkbookFromServer() {
-      // If database.xlsx is in a subfolder, adjust the path (e.g., "./data/database.xlsx")
-      fetch("Database.xlsx")
-        .then(res => {
-          if (!res.ok) throw new Error("Failed to load database.xlsx");
-          return res.arrayBuffer();
-        })
-        .then(buf => {
-          const workbook = XLSX.read(buf, { type: "array" });
+  let data = [];
 
-          // Try to find sheet named "Tab 10", otherwise use 10th sheet, else first
-          let sheetName =
-            workbook.SheetNames.find(
-              name => name.trim().toLowerCase() === "tab 10"
-            ) ||
-            workbook.SheetNames[9] || // 10th tab (index 9)
-            workbook.SheetNames[0];
+  const elements = {
+    personSearch: document.getElementById("personSearch"),
+    titleSearch: document.getElementById("titleSearch"),
+    journalSearch: document.getElementById("journalSearch"),
+    areaSelect: document.getElementById("areaSelect"),
+    positionSelect: document.getElementById("positionSelect"),
+    yearSelect: document.getElementById("yearSelect"),
+    utdYes: document.getElementById("utdYes"),
+    utdNo: document.getElementById("utdNo"),
+    ftYes: document.getElementById("ftYes"),
+    ftNo: document.getElementById("ftNo"),
+    rank4: document.getElementById("rank4"),
+    rank5: document.getElementById("rank5"),
+    rank5star: document.getElementById("rank5star"),
+    resultsBody: document.getElementById("resultsBody"),
+    resultsCount: document.getElementById("resultsCount"),
+  };
 
-          const sheet = workbook.Sheets[sheetName];
-          const json = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+  document.addEventListener("DOMContentLoaded", () => {
+    loadWorkbookFromServer();
+    attachListeners();
+  });
 
-          data = json.map(row => ({
-            personName: row.Personname || "",
-            position: row.Position || "",
-            area: row.Area || "",
-            year: row.year || "",
-            articleTitle: row.articletitle || "",
-            journalName: row.journalname || "",
-            ranking: row["Ranking - Updated"] || "",
-            utdJournal: row["UTD Journal"] || "",
-            ftJournal: row["Financial Times Journal"] || "",
-          }));
+  // 🔍 NEW: find the sheet that actually has the right headers
+  function findSheetWithHeaders(workbook) {
+    const targetHeaders = [
+      "Personname",
+      "Position",
+      "Area",
+      "year",
+      "articletitle",
+      "journalname",
+      "Ranking - Updated",
+      "UTD Journal",
+      "Financial Times Journal",
+    ].map(h => h.toLowerCase());
 
-          populateDropdowns();
-          renderTable(data);
-        })
-        .catch(err => {
-          console.error(err);
-          elements.resultsCount.textContent =
-            "Error loading database.xlsx. Check console for details.";
-        });
-    }
+    let bestSheet = workbook.SheetNames[0];
 
-    function populateDropdowns() {
-      const addOptions = (select, values) => {
-        const prevValue = select.value;
-        select.innerHTML = "<option value=''>All</option>";
-        [...new Set(values.filter(v => v))]
-          .sort()
-          .forEach(v => {
-            const opt = document.createElement("option");
-            opt.value = v;
-            opt.textContent = v;
-            select.appendChild(opt);
-          });
-        // Try to keep previous selection if still valid
-        if ([...select.options].some(o => o.value === prevValue)) {
-          select.value = prevValue;
-        }
-      };
-
-      addOptions(elements.areaSelect, data.map(d => d.area));
-      addOptions(elements.positionSelect, data.map(d => d.position));
-      addOptions(elements.yearSelect, data.map(d => d.year));
-    }
-
-    function renderTable(rows) {
-      elements.resultsBody.innerHTML = "";
-      rows.forEach(r => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${r.personName}</td>
-          <td>${r.position || ""}<br><small>${r.area || ""}</small></td>
-          <td>${r.year}</td>
-          <td>${r.articleTitle}</td>
-          <td>${r.journalName}</td>
-          <td>
-            ${r.ranking ? `<span class="badge badge-blue">Rank ${r.ranking}</span>` : ""}
-            ${r.utdJournal === "Yes" ? `<span class="badge badge-green">UTD</span>` : ""}
-            ${r.ftJournal === "Yes" ? `<span class="badge badge-gold">FT</span>` : ""}
-          </td>`;
-        elements.resultsBody.appendChild(tr);
-      });
-      elements.resultsCount.textContent = `Showing ${rows.length} results`;
-    }
-
-    function applyFilters() {
-      const pq = elements.personSearch.value.toLowerCase();
-      const tq = elements.titleSearch.value.toLowerCase();
-      const jq = elements.journalSearch.value.toLowerCase();
-      const area = elements.areaSelect.value;
-      const pos = elements.positionSelect.value;
-      const yr = elements.yearSelect.value;
-      const utdY = elements.utdYes.checked, utdN = elements.utdNo.checked;
-      const ftY = elements.ftYes.checked, ftN = elements.ftNo.checked;
-      const r4 = elements.rank4.checked, r5 = elements.rank5.checked, r5s = elements.rank5star.checked;
-
-      const filtered = data.filter(d => {
-        if (pq && !d.personName.toLowerCase().includes(pq)) return false;
-        if (tq && !d.articleTitle.toLowerCase().includes(tq)) return false;
-        if (jq && !d.journalName.toLowerCase().includes(jq)) return false;
-        if (area && d.area !== area) return false;
-        if (pos && d.position !== pos) return false;
-        if (yr && String(d.year) !== String(yr)) return false;
-
-        if ((utdY || utdN) &&
-            !((utdY && d.utdJournal === "Yes") || (utdN && d.utdJournal === "No"))) {
-          return false;
-        }
-
-        if ((ftY || ftN) &&
-            !((ftY && d.ftJournal === "Yes") || (ftN && d.ftJournal === "No"))) {
-          return false;
-        }
-
-        if ((r4 || r5 || r5s) &&
-            !((r4 && d.ranking === "4") ||
-              (r5 && d.ranking === "5") ||
-              (r5s && d.ranking === "5*"))) {
-          return false;
-        }
-
-        return true;
+    workbook.SheetNames.forEach(name => {
+      const sheet = workbook.Sheets[name];
+      const rows = XLSX.utils.sheet_to_json(sheet, {
+        header: 1,      // get rows as arrays
+        range: 0,       // start at first row
+        blankrows: false,
       });
 
-      renderTable(filtered);
-    }
+      const headerRow = rows[0] || [];
+      const headerSet = new Set(
+        headerRow.map(h => String(h || "").trim().toLowerCase())
+      );
 
-    function attachListeners() {
-      [
-        elements.personSearch, elements.titleSearch, elements.journalSearch,
-        elements.areaSelect, elements.positionSelect, elements.yearSelect,
-        elements.utdYes, elements.utdNo, elements.ftYes, elements.ftNo,
-        elements.rank4, elements.rank5, elements.rank5star
-      ].forEach(el => el.addEventListener("input", applyFilters));
-    }
-  </script>
+      const matchesAll = targetHeaders.every(h => headerSet.has(h));
+      if (matchesAll) {
+        bestSheet = name;
+      }
+    });
+
+    return bestSheet;
+  }
+
+  function loadWorkbookFromServer() {
+    // ⚠️ must match exact filename + case in the repo: Database.xlsx
+    fetch("Database.xlsx")
+      .then(res => {
+        console.log("Fetch response:", res.status, res.statusText);
+        if (!res.ok) throw new Error("Failed to load Database.xlsx");
+        return res.arrayBuffer();
+      })
+      .then(buf => {
+        const workbook = XLSX.read(buf, { type: "array" });
+
+        const sheetName = findSheetWithHeaders(workbook);
+        console.log("Using sheet:", sheetName, "All sheets:", workbook.SheetNames);
+
+        const sheet = workbook.Sheets[sheetName];
+        const json = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+
+        console.log("First row keys:", Object.keys(json[0] || {}));
+
+        data = json.map(row => ({
+          personName: row.Personname || "",
+          position: row.Position || "",
+          area: row.Area || "",
+          year: row.year || "",
+          articleTitle: row.articletitle || "",
+          journalName: row.journalname || "",
+          ranking: row["Ranking - Updated"] || "",
+          utdJournal: row["UTD Journal"] || "",
+          ftJournal: row["Financial Times Journal"] || "",
+        }));
+
+        populateDropdowns();
+        renderTable(data);
+      })
+      .catch(err => {
+        console.error("Error loading workbook:", err);
+        elements.resultsCount.textContent =
+          "Error loading Database.xlsx. Open DevTools → Console for details.";
+      });
+  }
+
+  // … keep your existing populateDropdowns, renderTable, applyFilters, attachListeners here …
+</script>
+
 </body>
 </html>
 

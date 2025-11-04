@@ -306,6 +306,40 @@ th:nth-child(3), td:nth-child(3) { width: 160px; } /* Area */
       letter-spacing: 0.08em;
       color: #444;
     }
+/* Light grey grid lines across table */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #e3e3e3; /* Outer border */
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+th,
+td {
+  padding: 10px 12px;
+  border: 1px solid #eaeaea; /* Inner grid lines */
+  text-align: left;
+}
+
+th {
+  background: #f8f8f8;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #444;
+}
+
+tr:hover {
+  background: #fafafa; /* Subtle hover effect */
+}
+/* Optional: cleaner border + shadow for the table wrapper */
+.table-container {
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  border: 1px solid #e0e0e0;
+}
 
     tr:nth-child(even) {
       background: #fcfcfc;
@@ -464,7 +498,10 @@ th:nth-child(3), td:nth-child(3) { width: 160px; } /* Area */
       </div>
     </div>
 
-    <div style="overflow:auto; max-height:500px; border:1px solid #eee; border-radius:6px; margin-top: 14px;">
+    <div class="table-container" style="overflow:auto; max-height:500px;">
+  <table> ... </table>
+</div>
+
       <table>
         <thead>
   <tr>
@@ -484,6 +521,8 @@ th:nth-child(3), td:nth-child(3) { width: 160px; } /* Area */
       </table>
     </div>
   </div>
+
+
 
   <script>
   let data = [];

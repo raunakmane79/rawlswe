@@ -83,6 +83,51 @@
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
+/* --- Footer Section --- */
+.rawls-footer {
+  background: #000;
+  border-top: 4px solid #ba0c2f;
+  color: #f0f0f0;
+  padding: 12px 28px;
+  font-size: 0.85rem;
+  margin-top: 40px;
+}
+
+.rawls-footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1320px;
+  margin: 0 auto;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* LinkedIn button */
+.linkedin-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #ba0c2f;
+  color: #fff;
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.85rem;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.linkedin-btn img {
+  height: 16px;
+  width: 16px;
+  filter: brightness(0) invert(1);
+}
+
+.linkedin-btn:hover {
+  background: #8c001a;
+  transform: translateY(-1px);
+}
 
 
     /* Main card */
@@ -696,6 +741,20 @@
     }
   }
 </script>
+<footer class="rawls-footer">
+  <div class="rawls-footer-inner">
+    <span>© 2025 Rawls College Research</span>
+    <a
+      href="https://www.linkedin.com/showcase/research-rawls-college-of-business/"
+      target="_blank"
+      class="linkedin-btn"
+      aria-label="Visit Rawls College Research on LinkedIn"
+    >
+      <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" alt="LinkedIn logo">
+      Follow on LinkedIn
+    </a>
+  </div>
+</footer>
 
 </body>
 </html>

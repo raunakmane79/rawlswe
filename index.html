@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Rawls Faculty Publications Database</title>
 
   <!-- Rawls / TTU-ish fonts -->
@@ -16,7 +17,7 @@
       --rawls-red: #ba0c2f;          /* main Rawls red */
       --rawls-red-dark: #8c001a;
       --rawls-black: #1f1f1f;
-      --rawls-bg: #f5f5f5;
+      --rawls-bg: #f3f4f6;
       --rawls-card-bg: #ffffff;
       --rawls-border: #e0e0e0;
     }
@@ -28,7 +29,7 @@
 
     body {
       margin: 0;
-      background: var(--rawls-bg);
+      background: radial-gradient(circle at top left, #ffffff 0, #f3f4f6 45%, #e9ecf2 100%);
       color: var(--rawls-black);
     }
 
@@ -69,21 +70,92 @@
     /* Main card */
     .app {
       background: var(--rawls-card-bg);
-      padding: 24px;
+      padding: 24px 24px 20px;
       margin: 24px auto;
       border-radius: 12px;
       max-width: 1320px;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
-      border-top: 4px solid var(--rawls-red);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+      border-top: 5px solid var(--rawls-red);
+    }
+
+    .app-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 10px;
     }
 
     h1 {
-      margin: 0 0 12px;
+      margin: 0;
       font-family: "Roboto Condensed", system-ui, sans-serif;
       font-weight: 700;
-      font-size: 1.7rem;
+      font-size: 1.8rem;
       letter-spacing: 0.03em;
       color: var(--rawls-red);
+    }
+
+    .app-subtitle {
+      font-size: 0.9rem;
+      color: #555;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 6px;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar-left {
+      font-size: 0.85rem;
+      color: #555;
+    }
+
+    .toolbar-right {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .pill-label {
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid #e0e0e0;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #666;
+      background: #fafafa;
+    }
+
+    .btn {
+      border-radius: 999px;
+      border: 1px solid var(--rawls-border);
+      padding: 5px 12px;
+      font-size: 0.8rem;
+      background: #f8f8f8;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.05s ease;
+    }
+
+    .btn span {
+      font-size: 1rem;
+      line-height: 1;
+    }
+
+    .btn:hover {
+      background: #ffffff;
+      border-color: var(--rawls-red);
+      transform: translateY(-0.5px);
     }
 
     .filters {
@@ -91,6 +163,10 @@
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 12px 16px;
       margin-top: 12px;
+      padding: 12px 12px 4px;
+      border-radius: 10px;
+      border: 1px solid var(--rawls-border);
+      background: linear-gradient(to bottom, #fafafa, #ffffff);
     }
 
     .filter-group {
@@ -145,6 +221,7 @@
       padding: 8px 10px;
       border-bottom: 1px solid #eee;
       text-align: left;
+      vertical-align: top;
     }
 
     th {
@@ -167,7 +244,6 @@
     }
 
     #resultsCount {
-      margin-top: 15px;
       font-weight: 500;
       color: #444;
     }
@@ -183,15 +259,15 @@
       white-space: nowrap;
     }
 
-    /* Ranking badge in Rawls red */
+    /* Neutral ranking */
     .badge-blue {
-  background: #f8f8f8;
-  color: #333;
-  border: 1px solid #ddd;
-  border-radius: 999px;
-  padding: 2px 6px;
-  font-weight: 500;
-}
+      background: #f8f8f8;
+      color: #333;
+      border: 1px solid #ddd;
+      border-radius: 999px;
+      padding: 2px 6px;
+      font-weight: 500;
+    }
 
     /* Yes = green for both UTD & FT */
     .badge-green,
@@ -199,6 +275,12 @@
       background: #e8f5e9;
       color: #2e7d32;
       border: 1px solid rgba(46, 125, 50, 0.3);
+    }
+
+    .badge-no {
+      background: #f3f4f6;
+      color: #777;
+      border: 1px solid #ddd;
     }
   </style>
 </head>
@@ -208,14 +290,26 @@
     <div class="rawls-header-inner">
       <div class="rawls-header-brand">
         <span class="rawls-header-brand-main">Rawls College of Business</span>
-        <span class="rawls-header-brand-sub">Faculty Publications</span>
+        <span class="rawls-header-brand-sub">Texas Tech University &middot; Faculty Publications</span>
       </div>
     </div>
   </header>
-  <div class="app">
-    <h1>Rawls Faculty Publications Database</h1>
 
-    <!-- Upload removed; everything loads automatically from database.xlsx -->
+  <div class="app">
+    <div class="app-header">
+      <h1>Rawls Faculty Publications Database</h1>
+      <div class="app-subtitle">Explore peer-reviewed journal articles authored by Rawls faculty.</div>
+    </div>
+
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <span id="resultsCount">Loading publications...</span>
+      </div>
+      <div class="toolbar-right">
+        <span class="pill-label">Filter Results</span>
+        <button class="btn" id="clearFilters"><span>&#10006;</span> Clear filters</button>
+      </div>
+    </div>
 
     <div class="filters">
       <div class="filter-group">
@@ -293,236 +387,257 @@
       </div>
     </div>
 
-    <p id="resultsCount" style="margin-top:15px; font-weight:500;"></p>
-
-    <div style="overflow:auto; max-height:500px; border:1px solid #eee; border-radius:6px;">
+    <div style="overflow:auto; max-height:500px; border:1px solid #eee; border-radius:6px; margin-top: 14px;">
       <table>
         <thead>
-  <tr>
-    <th>Person</th>
-    <th>Position / Area</th>
-    <th>Year</th>
-    <th>Article Title</th>
-    <th>Journal</th>
-    <th>Ranking</th>
-    <th>UTD</th>
-    <th>Financial Times</th>
-  </tr>
-</thead>
-
+          <tr>
+            <th>Person</th>
+            <th>Position / Area</th>
+            <th>Year</th>
+            <th>Article Title</th>
+            <th>Journal</th>
+            <th>Ranking</th>
+            <th>UTD</th>
+            <th>Financial Times</th>
+          </tr>
+        </thead>
         <tbody id="resultsBody"></tbody>
       </table>
     </div>
   </div>
 
-<script>
-  let data = [];
+  <script>
+    let data = [];
 
-  const elements = {
-    personSearch: document.getElementById("personSearch"),
-    titleSearch: document.getElementById("titleSearch"),
-    journalSearch: document.getElementById("journalSearch"),
-    areaSelect: document.getElementById("areaSelect"),
-    positionSelect: document.getElementById("positionSelect"),
-    yearSelect: document.getElementById("yearSelect"),
-    utdYes: document.getElementById("utdYes"),
-    utdNo: document.getElementById("utdNo"),
-    ftYes: document.getElementById("ftYes"),
-    ftNo: document.getElementById("ftNo"),
-    rank4: document.getElementById("rank4"),
-    rank5: document.getElementById("rank5"),
-    rank5star: document.getElementById("rank5star"),
-    resultsBody: document.getElementById("resultsBody"),
-    resultsCount: document.getElementById("resultsCount"),
-  };
-
-  document.addEventListener("DOMContentLoaded", () => {
-    loadWorkbookFromServer();
-    attachListeners();
-  });
-
-  // 🔍 Find the sheet that has the expected headers
-  function findSheetWithHeaders(workbook) {
-    const targetHeaders = [
-      "personname",
-      "position",
-      "area",
-      "year",
-      "articletitle",
-      "journalname",
-      "ranking - updated",
-      "utd journal",
-      "financial times journal",
-    ];
-
-    let bestSheet = workbook.SheetNames[0];
-
-    workbook.SheetNames.forEach(name => {
-      const sheet = workbook.Sheets[name];
-      const rows = XLSX.utils.sheet_to_json(sheet, {
-        header: 1,
-        range: 0,
-        blankrows: false,
-      });
-
-      const headerRow = rows[0] || [];
-      const headerSet = new Set(
-        headerRow.map(h => String(h || "").trim().toLowerCase())
-      );
-
-      const matchesAll = targetHeaders.every(h => headerSet.has(h));
-      if (matchesAll) bestSheet = name;
-    });
-
-    return bestSheet;
-  }
-
-  // Normalize object keys: "Journalname  " -> "journalname"
-  function normalizeRow(row) {
-    const norm = {};
-    Object.keys(row).forEach(key => {
-      const nk = String(key || "").trim().toLowerCase();
-      norm[nk] = row[key];
-    });
-    return norm;
-  }
-
-  function loadWorkbookFromServer() {
-    // ⚠️ match the exact filename & case in the repo
-    fetch("Database.xlsx")
-      .then(res => {
-        console.log("Fetch response:", res.status, res.statusText);
-        if (!res.ok) throw new Error("Failed to load Database.xlsx");
-        return res.arrayBuffer();
-      })
-      .then(buf => {
-        const workbook = XLSX.read(buf, { type: "array" });
-
-        const sheetName = findSheetWithHeaders(workbook);
-        console.log("Using sheet:", sheetName, "All sheets:", workbook.SheetNames);
-
-        const sheet = workbook.Sheets[sheetName];
-        const json = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-
-        console.log("Raw keys from first row:", Object.keys(json[0] || {}));
-
-        data = json.map(row => {
-          const r = normalizeRow(row);
-          return {
-            personName: r["personname"] || "",
-            position: r["position"] || "",
-            area: r["area"] || "",
-            year: r["year"] || "",
-            articleTitle: r["articletitle"] || "",
-            journalName: r["journalname"] || "",
-            ranking: String(r["ranking - updated"] || "").trim(),
-            utdJournal: String(r["utd journal"] || "").trim(),              // "Yes"/"No"
-            ftJournal: String(r["financial times journal"] || "").trim(),  // "Yes"/"No"
-          };
-        });
-
-        populateDropdowns();
-        renderTable(data);
-      })
-      .catch(err => {
-        console.error("Error loading workbook:", err);
-        elements.resultsCount.textContent =
-          "Error loading Database.xlsx. Open DevTools → Console for details.";
-      });
-  }
-
-  function populateDropdowns() {
-    const addOptions = (select, values) => {
-      const prevValue = select.value;
-      select.innerHTML = "<option value=''>All</option>";
-      [...new Set(values.filter(v => v))]
-        .sort()
-        .forEach(v => {
-          const opt = document.createElement("option");
-          opt.value = v;
-          opt.textContent = v;
-          select.appendChild(opt);
-        });
-      if ([...select.options].some(o => o.value === prevValue)) {
-        select.value = prevValue;
-      }
+    const elements = {
+      personSearch: document.getElementById("personSearch"),
+      titleSearch: document.getElementById("titleSearch"),
+      journalSearch: document.getElementById("journalSearch"),
+      areaSelect: document.getElementById("areaSelect"),
+      positionSelect: document.getElementById("positionSelect"),
+      yearSelect: document.getElementById("yearSelect"),
+      utdYes: document.getElementById("utdYes"),
+      utdNo: document.getElementById("utdNo"),
+      ftYes: document.getElementById("ftYes"),
+      ftNo: document.getElementById("ftNo"),
+      rank4: document.getElementById("rank4"),
+      rank5: document.getElementById("rank5"),
+      rank5star: document.getElementById("rank5star"),
+      resultsBody: document.getElementById("resultsBody"),
+      resultsCount: document.getElementById("resultsCount"),
+      clearFilters: document.getElementById("clearFilters"),
     };
 
-    addOptions(elements.areaSelect, data.map(d => d.area));
-    addOptions(elements.positionSelect, data.map(d => d.position));
-    addOptions(elements.yearSelect, data.map(d => d.year));
-  }
-
-  function renderTable(rows) {
-    elements.resultsBody.innerHTML = "";
-    rows.forEach(r => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${r.personName}</td>
-        <td>${r.position || ""}<br><small>${r.area || ""}</small></td>
-        <td>${r.year}</td>
-        <td>${r.articleTitle}</td>
-        <td>${r.journalName}</td>
-        <td>${r.ranking ? `<span class="badge badge-blue">${r.ranking}</span>` : ""}</td>
-        <td>${r.utdJournal === "Yes" ? `<span class="badge badge-green">Yes</span>` : (r.utdJournal === "No" ? "No" : "")}</td>
-        <td>${r.ftJournal === "Yes" ? `<span class="badge badge-green">Yes</span>` : (r.ftJournal === "No" ? "No" : "")}</td>
-      `;
-      elements.resultsBody.appendChild(tr);
-    });
-    elements.resultsCount.textContent = `Showing ${rows.length} results`;
-  }
-
-  function applyFilters() {
-    const pq = elements.personSearch.value.toLowerCase();
-    const tq = elements.titleSearch.value.toLowerCase();
-    const jq = elements.journalSearch.value.toLowerCase();
-    const area = elements.areaSelect.value;
-    const pos = elements.positionSelect.value;
-    const yr = elements.yearSelect.value;
-    const utdY = elements.utdYes.checked, utdN = elements.utdNo.checked;
-    const ftY = elements.ftYes.checked, ftN = elements.ftNo.checked;
-    const r4 = elements.rank4.checked, r5 = elements.rank5.checked, r5s = elements.rank5star.checked;
-
-    const filtered = data.filter(d => {
-      if (pq && !d.personName.toLowerCase().includes(pq)) return false;
-      if (tq && !d.articleTitle.toLowerCase().includes(tq)) return false;
-      if (jq && !d.journalName.toLowerCase().includes(jq)) return false;
-      if (area && d.area !== area) return false;
-      if (pos && d.position !== pos) return false;
-      if (yr && String(d.year) !== String(yr)) return false;
-
-      if ((utdY || utdN) &&
-          !((utdY && d.utdJournal === "Yes") || (utdN && d.utdJournal === "No"))) {
-        return false;
-      }
-
-      if ((ftY || ftN) &&
-          !((ftY && d.ftJournal === "Yes") || (ftN && d.ftJournal === "No"))) {
-        return false;
-      }
-
-      if ((r4 || r5 || r5s) &&
-          !((r4 && d.ranking === "4") ||
-            (r5 && d.ranking === "5") ||
-            (r5s && d.ranking === "5*"))) {
-        return false;
-      }
-
-      return true;
+    document.addEventListener("DOMContentLoaded", () => {
+      loadWorkbookFromServer();
+      attachListeners();
     });
 
-    renderTable(filtered);
-  }
+    // Find the sheet that has the expected headers
+    function findSheetWithHeaders(workbook) {
+      const targetHeaders = [
+        "personname",
+        "position",
+        "area",
+        "year",
+        "articletitle",
+        "journalname",
+        "ranking - updated",
+        "utd journal",
+        "financial times journal",
+      ];
 
-  function attachListeners() {
-    [
-      elements.personSearch, elements.titleSearch, elements.journalSearch,
-      elements.areaSelect, elements.positionSelect, elements.yearSelect,
-      elements.utdYes, elements.utdNo, elements.ftYes, elements.ftNo,
-      elements.rank4, elements.rank5, elements.rank5star
-    ].forEach(el => el.addEventListener("input", applyFilters));
-  }
-</script>
+      let bestSheet = workbook.SheetNames[0];
+
+      workbook.SheetNames.forEach(name => {
+        const sheet = workbook.Sheets[name];
+        const rows = XLSX.utils.sheet_to_json(sheet, {
+          header: 1,
+          range: 0,
+          blankrows: false,
+        });
+
+        const headerRow = rows[0] || [];
+        const headerSet = new Set(
+          headerRow.map(h => String(h || "").trim().toLowerCase())
+        );
+
+        const matchesAll = targetHeaders.every(h => headerSet.has(h));
+        if (matchesAll) bestSheet = name;
+      });
+
+      return bestSheet;
+    }
+
+    // Normalize object keys: "Journalname  " -> "journalname"
+    function normalizeRow(row) {
+      const norm = {};
+      Object.keys(row).forEach(key => {
+        const nk = String(key || "").trim().toLowerCase();
+        norm[nk] = row[key];
+      });
+      return norm;
+    }
+
+    function loadWorkbookFromServer() {
+      // match exact filename & case in repo
+      fetch("Database.xlsx")
+        .then(res => {
+          console.log("Fetch response:", res.status, res.statusText);
+          if (!res.ok) throw new Error("Failed to load Database.xlsx");
+          return res.arrayBuffer();
+        })
+        .then(buf => {
+          const workbook = XLSX.read(buf, { type: "array" });
+
+          const sheetName = findSheetWithHeaders(workbook);
+          console.log("Using sheet:", sheetName, "All sheets:", workbook.SheetNames);
+
+          const sheet = workbook.Sheets[sheetName];
+          const json = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+
+          console.log("Raw keys from first row:", Object.keys(json[0] || {}));
+
+          data = json.map(row => {
+            const r = normalizeRow(row);
+            return {
+              personName: r["personname"] || "",
+              position: r["position"] || "",
+              area: r["area"] || "",
+              year: r["year"] || "",
+              articleTitle: r["articletitle"] || "",
+              journalName: r["journalname"] || "",
+              ranking: String(r["ranking - updated"] || "").trim(),
+              utdJournal: String(r["utd journal"] || "").trim(),              // "Yes"/"No"
+              ftJournal: String(r["financial times journal"] || "").trim(),  // "Yes"/"No"
+            };
+          });
+
+          populateDropdowns();
+          renderTable(data);
+        })
+        .catch(err => {
+          console.error("Error loading workbook:", err);
+          elements.resultsCount.textContent =
+            "Error loading Database.xlsx. Open DevTools → Console for details.";
+        });
+    }
+
+    function populateDropdowns() {
+      const addOptions = (select, values) => {
+        const prevValue = select.value;
+        select.innerHTML = "<option value=''>All</option>";
+        [...new Set(values.filter(v => v))]
+          .sort()
+          .forEach(v => {
+            const opt = document.createElement("option");
+            opt.value = v;
+            opt.textContent = v;
+            select.appendChild(opt);
+          });
+        if ([...select.options].some(o => o.value === prevValue)) {
+          select.value = prevValue;
+        }
+      };
+
+      addOptions(elements.areaSelect, data.map(d => d.area));
+      addOptions(elements.positionSelect, data.map(d => d.position));
+      addOptions(elements.yearSelect, data.map(d => d.year));
+    }
+
+    function renderTable(rows) {
+      elements.resultsBody.innerHTML = "";
+      rows.forEach(r => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${r.personName}</td>
+          <td>${r.position || ""}<br><small>${r.area || ""}</small></td>
+          <td>${r.year}</td>
+          <td>${r.articleTitle}</td>
+          <td>${r.journalName}</td>
+          <td>${r.ranking ? `<span class="badge badge-blue">${r.ranking}</span>` : ""}</td>
+          <td>${r.utdJournal === "Yes"
+              ? `<span class="badge badge-green">Yes</span>`
+              : (r.utdJournal === "No" ? `<span class="badge badge-no">No</span>` : "")}</td>
+          <td>${r.ftJournal === "Yes"
+              ? `<span class="badge badge-green">Yes</span>`
+              : (r.ftJournal === "No" ? `<span class="badge badge-no">No</span>` : "")}</td>
+        `;
+        elements.resultsBody.appendChild(tr);
+      });
+      elements.resultsCount.textContent = `Showing ${rows.length} results`;
+    }
+
+    function applyFilters() {
+      const pq = elements.personSearch.value.toLowerCase();
+      const tq = elements.titleSearch.value.toLowerCase();
+      const jq = elements.journalSearch.value.toLowerCase();
+      const area = elements.areaSelect.value;
+      const pos = elements.positionSelect.value;
+      const yr = elements.yearSelect.value;
+      const utdY = elements.utdYes.checked, utdN = elements.utdNo.checked;
+      const ftY = elements.ftYes.checked, ftN = elements.ftNo.checked;
+      const r4 = elements.rank4.checked, r5 = elements.rank5.checked, r5s = elements.rank5star.checked;
+
+      const filtered = data.filter(d => {
+        if (pq && !d.personName.toLowerCase().includes(pq)) return false;
+        if (tq && !d.articleTitle.toLowerCase().includes(tq)) return false;
+        if (jq && !d.journalName.toLowerCase().includes(jq)) return false;
+        if (area && d.area !== area) return false;
+        if (pos && d.position !== pos) return false;
+        if (yr && String(d.year) !== String(yr)) return false;
+
+        if ((utdY || utdN) &&
+            !((utdY && d.utdJournal === "Yes") || (utdN && d.utdJournal === "No"))) {
+          return false;
+        }
+
+        if ((ftY || ftN) &&
+            !((ftY && d.ftJournal === "Yes") || (ftN && d.ftJournal === "No"))) {
+          return false;
+        }
+
+        if ((r4 || r5 || r5s) &&
+            !((r4 && d.ranking === "4") ||
+              (r5 && d.ranking === "5") ||
+              (r5s && d.ranking === "5*"))) {
+          return false;
+        }
+
+        return true;
+      });
+
+      renderTable(filtered);
+    }
+
+    function attachListeners() {
+      [
+        elements.personSearch, elements.titleSearch, elements.journalSearch,
+        elements.areaSelect, elements.positionSelect, elements.yearSelect,
+        elements.utdYes, elements.utdNo, elements.ftYes, elements.ftNo,
+        elements.rank4, elements.rank5, elements.rank5star
+      ].forEach(el => el.addEventListener("input", applyFilters));
+
+      if (elements.clearFilters) {
+        elements.clearFilters.addEventListener("click", () => {
+          elements.personSearch.value = "";
+          elements.titleSearch.value = "";
+          elements.journalSearch.value = "";
+          elements.areaSelect.value = "";
+          elements.positionSelect.value = "";
+          elements.yearSelect.value = "";
+          elements.utdYes.checked = false;
+          elements.utdNo.checked = false;
+          elements.ftYes.checked = false;
+          elements.ftNo.checked = false;
+          elements.rank4.checked = false;
+          elements.rank5.checked = false;
+          elements.rank5star.checked = false;
+          renderTable(data);
+        });
+      }
+    }
+  </script>
 </body>
 </html>
 

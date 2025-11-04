@@ -157,7 +157,7 @@
 
     function loadWorkbookFromServer() {
       // If database.xlsx is in a subfolder, adjust the path (e.g., "./data/database.xlsx")
-      fetch("database.xlsx")
+      fetch("Database.xlsx")
         .then(res => {
           if (!res.ok) throw new Error("Failed to load database.xlsx");
           return res.arrayBuffer();

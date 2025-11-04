@@ -281,7 +281,7 @@
         <td>${r.journalName}</td>
         <td>${r.ranking ? `<span class="badge badge-blue">${r.ranking}</span>` : ""}</td>
         <td>${r.utdJournal === "Yes" ? `<span class="badge badge-green">Yes</span>` : (r.utdJournal === "No" ? "No" : "")}</td>
-        <td>${r.ftJournal === "Yes" ? `<span class="badge badge-gold">Yes</span>` : (r.ftJournal === "No" ? "No" : "")}</td>
+        <td>${r.ftJournal === "Yes" ? `<span class="badge badge-green">Yes</span>` : (r.ftJournal === "No" ? "No" : "")}</td>
       `;
       elements.resultsBody.appendChild(tr);
     });

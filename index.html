@@ -408,273 +408,272 @@
   </div>
 
   <script>
-    let data = [];
-let currentRows = [];
+  let data = [];
+  let currentRows = [];
 
-    const elements = {
-      personSearch: document.getElementById("personSearch"),
-      titleSearch: document.getElementById("titleSearch"),
-      journalSearch: document.getElementById("journalSearch"),
-      areaSelect: document.getElementById("areaSelect"),
-      positionSelect: document.getElementById("positionSelect"),
-      yearSelect: document.getElementById("yearSelect"),
-      utdYes: document.getElementById("utdYes"),
-      utdNo: document.getElementById("utdNo"),
-      ftYes: document.getElementById("ftYes"),
-      ftNo: document.getElementById("ftNo"),
-      rank4: document.getElementById("rank4"),
-      rank5: document.getElementById("rank5"),
-      rank5star: document.getElementById("rank5star"),
-      resultsBody: document.getElementById("resultsBody"),
-      resultsCount: document.getElementById("resultsCount"),
-      clearFilters: document.getElementById("clearFilters"),
-      exportExcel: document.getElementById("exportExcel"),
+  const elements = {
+    personSearch: document.getElementById("personSearch"),
+    titleSearch: document.getElementById("titleSearch"),
+    journalSearch: document.getElementById("journalSearch"),
+    areaSelect: document.getElementById("areaSelect"),
+    positionSelect: document.getElementById("positionSelect"),
+    yearSelect: document.getElementById("yearSelect"),
+    utdYes: document.getElementById("utdYes"),
+    utdNo: document.getElementById("utdNo"),
+    ftYes: document.getElementById("ftYes"),
+    ftNo: document.getElementById("ftNo"),
+    rank4: document.getElementById("rank4"),
+    rank5: document.getElementById("rank5"),
+    rank5star: document.getElementById("rank5star"),
+    resultsBody: document.getElementById("resultsBody"),
+    resultsCount: document.getElementById("resultsCount"),
+    clearFilters: document.getElementById("clearFilters"),
+    exportExcel: document.getElementById("exportExcel"),
+  };
 
+  document.addEventListener("DOMContentLoaded", () => {
+    loadWorkbookFromServer();
+    attachListeners();
+  });
+
+  // Find the sheet that has the expected headers
+  function findSheetWithHeaders(workbook) {
+    const targetHeaders = [
+      "personname",
+      "position",
+      "area",
+      "year",
+      "articletitle",
+      "journalname",
+      "ranking - updated",
+      "utd journal",
+      "financial times journal",
+    ];
+
+    let bestSheet = workbook.SheetNames[0];
+
+    workbook.SheetNames.forEach(name => {
+      const sheet = workbook.Sheets[name];
+      const rows = XLSX.utils.sheet_to_json(sheet, {
+        header: 1,
+        range: 0,
+        blankrows: false,
+      });
+
+      const headerRow = rows[0] || [];
+      const headerSet = new Set(
+        headerRow.map(h => String(h || "").trim().toLowerCase())
+      );
+
+      const matchesAll = targetHeaders.every(h => headerSet.has(h));
+      if (matchesAll) bestSheet = name;
+    });
+
+    return bestSheet;
+  }
+
+  // Normalize object keys: "Journalname  " -> "journalname"
+  function normalizeRow(row) {
+    const norm = {};
+    Object.keys(row).forEach(key => {
+      const nk = String(key || "").trim().toLowerCase();
+      norm[nk] = row[key];
+    });
+    return norm;
+  }
+
+  function loadWorkbookFromServer() {
+    // match exact filename & case in repo
+    fetch("Database.xlsx")
+      .then(res => {
+        console.log("Fetch response:", res.status, res.statusText);
+        if (!res.ok) throw new Error("Failed to load Database.xlsx");
+        return res.arrayBuffer();
+      })
+      .then(buf => {
+        const workbook = XLSX.read(buf, { type: "array" });
+
+        const sheetName = findSheetWithHeaders(workbook);
+        console.log("Using sheet:", sheetName, "All sheets:", workbook.SheetNames);
+
+        const sheet = workbook.Sheets[sheetName];
+        const json = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+
+        console.log("Raw keys from first row:", Object.keys(json[0] || {}));
+
+        data = json.map(row => {
+          const r = normalizeRow(row);
+          return {
+            personName: r["personname"] || "",
+            position: r["position"] || "",
+            area: r["area"] || "",
+            year: r["year"] || "",
+            articleTitle: r["articletitle"] || "",
+            journalName: r["journalname"] || "",
+            ranking: String(r["ranking - updated"] || "").trim(),
+            utdJournal: String(r["utd journal"] || "").trim(),              // "Yes"/"No"
+            ftJournal: String(r["financial times journal"] || "").trim(),  // "Yes"/"No"
+          };
+        });
+
+        populateDropdowns();
+        renderTable(data);
+      })
+      .catch(err => {
+        console.error("Error loading workbook:", err);
+        elements.resultsCount.textContent =
+          "Error loading Database.xlsx. Open DevTools → Console for details.";
+      });
+  }
+
+  function populateDropdowns() {
+    const addOptions = (select, values) => {
+      const prevValue = select.value;
+      select.innerHTML = "<option value=''>All</option>";
+      [...new Set(values.filter(v => v))]
+        .sort()
+        .forEach(v => {
+          const opt = document.createElement("option");
+          opt.value = v;
+          opt.textContent = v;
+          select.appendChild(opt);
+        });
+      if ([...select.options].some(o => o.value === prevValue)) {
+        select.value = prevValue;
+      }
     };
 
-    document.addEventListener("DOMContentLoaded", () => {
-      loadWorkbookFromServer();
-      attachListeners();
+    addOptions(elements.areaSelect, data.map(d => d.area));
+    addOptions(elements.positionSelect, data.map(d => d.position));
+    addOptions(elements.yearSelect, data.map(d => d.year));
+  }
+
+  function renderTable(rows) {
+    currentRows = rows.slice(); // keep a copy of whatever is currently displayed
+
+    elements.resultsBody.innerHTML = "";
+    rows.forEach(r => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${r.personName}</td>
+        <td>${r.position || ""}<br><small>${r.area || ""}</small></td>
+        <td>${r.year}</td>
+        <td>${r.articleTitle}</td>
+        <td>${r.journalName}</td>
+        <td>${r.ranking ? `<span class="badge badge-blue">${r.ranking}</span>` : ""}</td>
+        <td>${r.utdJournal === "Yes"
+            ? `<span class="badge badge-green">Yes</span>`
+            : (r.utdJournal === "No" ? `<span class="badge badge-no">No</span>` : "")}</td>
+        <td>${r.ftJournal === "Yes"
+            ? `<span class="badge badge-green">Yes</span>`
+            : (r.ftJournal === "No" ? `<span class="badge badge-no">No</span>` : "")}</td>
+      `;
+      elements.resultsBody.appendChild(tr);
+    });
+    elements.resultsCount.textContent = `Showing ${rows.length} results`;
+  }
+
+  function exportFilteredToExcel() {
+    if (!currentRows || currentRows.length === 0) {
+      alert("There are no rows to export.");
+      return;
+    }
+
+    // Map to friendly column headers for Excel
+    const exportData = currentRows.map(r => ({
+      "Person": r.personName,
+      "Position": r.position,
+      "Area": r.area,
+      "Year": r.year,
+      "Article Title": r.articleTitle,
+      "Journal": r.journalName,
+      "Ranking": r.ranking,
+      "UTD Journal": r.utdJournal,
+      "Financial Times Journal": r.ftJournal,
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Filtered Results");
+
+    XLSX.writeFile(wb, "Rawls_Publications_Filtered.xlsx");
+  }
+
+  function applyFilters() {
+    const pq = elements.personSearch.value.toLowerCase();
+    const tq = elements.titleSearch.value.toLowerCase();
+    const jq = elements.journalSearch.value.toLowerCase();
+    const area = elements.areaSelect.value;
+    const pos = elements.positionSelect.value;
+    const yr = elements.yearSelect.value;
+    const utdY = elements.utdYes.checked, utdN = elements.utdNo.checked;
+    const ftY = elements.ftYes.checked, ftN = elements.ftNo.checked;
+    const r4 = elements.rank4.checked, r5 = elements.rank5.checked, r5s = elements.rank5star.checked;
+
+    const filtered = data.filter(d => {
+      if (pq && !d.personName.toLowerCase().includes(pq)) return false;
+      if (tq && !d.articleTitle.toLowerCase().includes(tq)) return false;
+      if (jq && !d.journalName.toLowerCase().includes(jq)) return false;
+      if (area && d.area !== area) return false;
+      if (pos && d.position !== pos) return false;
+      if (yr && String(d.year) !== String(yr)) return false;
+
+      if ((utdY || utdN) &&
+          !((utdY && d.utdJournal === "Yes") || (utdN && d.utdJournal === "No"))) {
+        return false;
+      }
+
+      if ((ftY || ftN) &&
+          !((ftY && d.ftJournal === "Yes") || (ftN && d.ftJournal === "No"))) {
+        return false;
+      }
+
+      if ((r4 || r5 || r5s) &&
+          !((r4 && d.ranking === "4") ||
+            (r5 && d.ranking === "5") ||
+            (r5s && d.ranking === "5*"))) {
+        return false;
+      }
+
+      return true;
     });
 
-    // Find the sheet that has the expected headers
-    function findSheetWithHeaders(workbook) {
-      const targetHeaders = [
-        "personname",
-        "position",
-        "area",
-        "year",
-        "articletitle",
-        "journalname",
-        "ranking - updated",
-        "utd journal",
-        "financial times journal",
-      ];
-
-      let bestSheet = workbook.SheetNames[0];
-
-      workbook.SheetNames.forEach(name => {
-        const sheet = workbook.Sheets[name];
-        const rows = XLSX.utils.sheet_to_json(sheet, {
-          header: 1,
-          range: 0,
-          blankrows: false,
-        });
-
-        const headerRow = rows[0] || [];
-        const headerSet = new Set(
-          headerRow.map(h => String(h || "").trim().toLowerCase())
-        );
-
-        const matchesAll = targetHeaders.every(h => headerSet.has(h));
-        if (matchesAll) bestSheet = name;
-      });
-
-      return bestSheet;
-    }
-
-    // Normalize object keys: "Journalname  " -> "journalname"
-    function normalizeRow(row) {
-      const norm = {};
-      Object.keys(row).forEach(key => {
-        const nk = String(key || "").trim().toLowerCase();
-        norm[nk] = row[key];
-      });
-      return norm;
-    }
-
-    function loadWorkbookFromServer() {
-      // match exact filename & case in repo
-      fetch("Database.xlsx")
-        .then(res => {
-          console.log("Fetch response:", res.status, res.statusText);
-          if (!res.ok) throw new Error("Failed to load Database.xlsx");
-          return res.arrayBuffer();
-        })
-        .then(buf => {
-          const workbook = XLSX.read(buf, { type: "array" });
-
-          const sheetName = findSheetWithHeaders(workbook);
-          console.log("Using sheet:", sheetName, "All sheets:", workbook.SheetNames);
-
-          const sheet = workbook.Sheets[sheetName];
-          const json = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-
-          console.log("Raw keys from first row:", Object.keys(json[0] || {}));
-
-          data = json.map(row => {
-            const r = normalizeRow(row);
-            return {
-              personName: r["personname"] || "",
-              position: r["position"] || "",
-              area: r["area"] || "",
-              year: r["year"] || "",
-              articleTitle: r["articletitle"] || "",
-              journalName: r["journalname"] || "",
-              ranking: String(r["ranking - updated"] || "").trim(),
-              utdJournal: String(r["utd journal"] || "").trim(),              // "Yes"/"No"
-              ftJournal: String(r["financial times journal"] || "").trim(),  // "Yes"/"No"
-            };
-          });
-
-          populateDropdowns();
-          renderTable(data);
-        })
-        .catch(err => {
-          console.error("Error loading workbook:", err);
-          elements.resultsCount.textContent =
-            "Error loading Database.xlsx. Open DevTools → Console for details.";
-        });
-    }
-
-    function populateDropdowns() {
-      const addOptions = (select, values) => {
-        const prevValue = select.value;
-        select.innerHTML = "<option value=''>All</option>";
-        [...new Set(values.filter(v => v))]
-          .sort()
-          .forEach(v => {
-            const opt = document.createElement("option");
-            opt.value = v;
-            opt.textContent = v;
-            select.appendChild(opt);
-          });
-        if ([...select.options].some(o => o.value === prevValue)) {
-          select.value = prevValue;
-        }
-      };
-
-      addOptions(elements.areaSelect, data.map(d => d.area));
-      addOptions(elements.positionSelect, data.map(d => d.position));
-      addOptions(elements.yearSelect, data.map(d => d.year));
-    }
-
-    function renderTable(rows) {
-  currentRows = rows.slice(); // keep a copy of whatever is currently displayed
-
-  elements.resultsBody.innerHTML = "";
-  rows.forEach(r => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${r.personName}</td>
-      <td>${r.position || ""}<br><small>${r.area || ""}</small></td>
-      <td>${r.year}</td>
-      <td>${r.articleTitle}</td>
-      <td>${r.journalName}</td>
-      <td>${r.ranking ? `<span class="badge badge-blue">${r.ranking}</span>` : ""}</td>
-      <td>${r.utdJournal === "Yes"
-          ? `<span class="badge badge-green">Yes</span>`
-          : (r.utdJournal === "No" ? `<span class="badge badge-no">No</span>` : "")}</td>
-      <td>${r.ftJournal === "Yes"
-          ? `<span class="badge badge-green">Yes</span>`
-          : (r.ftJournal === "No" ? `<span class="badge badge-no">No</span>` : "")}</td>
-    `;
-    elements.resultsBody.appendChild(tr);
-  });
-  elements.resultsCount.textContent = `Showing ${rows.length} results`;
-}
-function exportFilteredToExcel() {
-  if (!currentRows || currentRows.length === 0) {
-    alert("There are no rows to export.");
-    return;
+    renderTable(filtered);
   }
 
-  // Map to friendly column headers for Excel
-  const exportData = currentRows.map(r => ({
-    "Person": r.personName,
-    "Position": r.position,
-    "Area": r.area,
-    "Year": r.year,
-    "Article Title": r.articleTitle,
-    "Journal": r.journalName,
-    "Ranking": r.ranking,
-    "UTD Journal": r.utdJournal,
-    "Financial Times Journal": r.ftJournal,
-  }));
+  function attachListeners() {
+    [
+      elements.personSearch, elements.titleSearch, elements.journalSearch,
+      elements.areaSelect, elements.positionSelect, elements.yearSelect,
+      elements.utdYes, elements.utdNo, elements.ftYes, elements.ftNo,
+      elements.rank4, elements.rank5, elements.rank5star
+    ].forEach(el => el.addEventListener("input", applyFilters));
 
-  const ws = XLSX.utils.json_to_sheet(exportData);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Filtered Results");
-
-  XLSX.writeFile(wb, "Rawls_Publications_Filtered.xlsx");
-}
-
-
-    function applyFilters() {
-      const pq = elements.personSearch.value.toLowerCase();
-      const tq = elements.titleSearch.value.toLowerCase();
-      const jq = elements.journalSearch.value.toLowerCase();
-      const area = elements.areaSelect.value;
-      const pos = elements.positionSelect.value;
-      const yr = elements.yearSelect.value;
-      const utdY = elements.utdYes.checked, utdN = elements.utdNo.checked;
-      const ftY = elements.ftYes.checked, ftN = elements.ftNo.checked;
-      const r4 = elements.rank4.checked, r5 = elements.rank5.checked, r5s = elements.rank5star.checked;
-
-      const filtered = data.filter(d => {
-        if (pq && !d.personName.toLowerCase().includes(pq)) return false;
-        if (tq && !d.articleTitle.toLowerCase().includes(tq)) return false;
-        if (jq && !d.journalName.toLowerCase().includes(jq)) return false;
-        if (area && d.area !== area) return false;
-        if (pos && d.position !== pos) return false;
-        if (yr && String(d.year) !== String(yr)) return false;
-
-        if ((utdY || utdN) &&
-            !((utdY && d.utdJournal === "Yes") || (utdN && d.utdJournal === "No"))) {
-          return false;
-        }
-
-        if ((ftY || ftN) &&
-            !((ftY && d.ftJournal === "Yes") || (ftN && d.ftJournal === "No"))) {
-          return false;
-        }
-
-        if ((r4 || r5 || r5s) &&
-            !((r4 && d.ranking === "4") ||
-              (r5 && d.ranking === "5") ||
-              (r5s && d.ranking === "5*"))) {
-          return false;
-        }
-
-        return true;
+    if (elements.clearFilters) {
+      elements.clearFilters.addEventListener("click", () => {
+        elements.personSearch.value = "";
+        elements.titleSearch.value = "";
+        elements.journalSearch.value = "";
+        elements.areaSelect.value = "";
+        elements.positionSelect.value = "";
+        elements.yearSelect.value = "";
+        elements.utdYes.checked = false;
+        elements.utdNo.checked = false;
+        elements.ftYes.checked = false;
+        elements.ftNo.checked = false;
+        elements.rank4.checked = false;
+        elements.rank5.checked = false;
+        elements.rank5star.checked = false;
+        renderTable(data);
       });
-
-      renderTable(filtered);
     }
 
-   function attachListeners() {
-  [
-    elements.personSearch, elements.titleSearch, elements.journalSearch,
-    elements.areaSelect, elements.positionSelect, elements.yearSelect,
-    elements.utdYes, elements.utdNo, elements.ftYes, elements.ftNo,
-    elements.rank4, elements.rank5, elements.rank5star
-  ].forEach(el => el.addEventListener("input", applyFilters));
-
-  if (elements.clearFilters) {
-    elements.clearFilters.addEventListener("click", () => {
-      elements.personSearch.value = "";
-      elements.titleSearch.value = "";
-      elements.journalSearch.value = "";
-      elements.areaSelect.value = "";
-      elements.positionSelect.value = "";
-      elements.yearSelect.value = "";
-      elements.utdYes.checked = false;
-      elements.utdNo.checked = false;
-      elements.ftYes.checked = false;
-      elements.ftNo.checked = false;
-      elements.rank4.checked = false;
-      elements.rank5.checked = false;
-      elements.rank5star.checked = false;
-      renderTable(data);
-    });
-  }
-
-  if (elements.exportExcel) {
-    elements.exportExcel.addEventListener("click", exportFilteredToExcel);
-  }
-}
+    if (elements.exportExcel) {
+      elements.exportExcel.addEventListener("click", exportFilteredToExcel);
     }
-  </script>
+  }
+</script>
+
 </body>
 </html>
 

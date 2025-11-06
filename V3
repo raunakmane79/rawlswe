@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Rawls Faculty Publications Database</title>
+
+  <!-- Rawls / TTU-ish fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+  <style>
+    :root {
+      --rawls-red: #ba0c2f;          /* main Rawls red */
+      --rawls-red-dark: #8c001a;
+      --rawls-black: #1f1f1f;
+      --rawls-bg: #f3f4f6;
+      --rawls-card-bg: #ffffff;
+      --rawls-border: #e0e0e0;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: "Roboto", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top left, #ffffff 0, #f3f4f6 45%, #e9ecf2 100%);
+      color: var(--rawls-black);
+    }
+
+    /* Top black TTU-style bar */
+ /* --- TTU Rawls-style black header --- */
+.rawls-header {
+  background: linear-gradient(to right, #000 60%, #111 100%);                   /* solid black bar */
+  border-bottom: 4px solid #ba0c2f;      /* TTU red underline accent */
+  color: #fff;
+  padding: 10px 28px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  position: sticky;                      /* keeps bar visible when scrolling */
+  top: 0;
+  z-index: 1000;
+}
+
+.rawls-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 16px;
+  max-width: 1320px;
+  margin: 0 auto;
+}
+
+/* Logo sizing */
+.rawls-logo {
+  height: 46px;          /* perfect balance next to text */
+  width: auto;
+  object-fit: contain;
+}
+
+/* Branding text */
+.rawls-header-brand {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+
+.rawls-header-brand-main {
+  font-family: "Roboto Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: #fff;
+  letter-spacing: 0.02em;
+}
+
+.rawls-header-brand-sub {
+  font-size: 0.85rem;
+  color: #ccc;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+/* --- Footer Section --- */
+ 
+.rawls-footer {
+  margin: 0;
+  flex-shrink: 0; 
+  background: #000;
+  border-top: 4px solid #ba0c2f;
+  color: #f0f0f0;
+  padding: 12px 28px;
+  font-size: 0.85rem;
+  margin-top: 40px;
+}
+
+.rawls-footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1320px;
+  margin: 0 auto;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.linkedin-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #0077b5;           /* LinkedIn blue */
+  color: #fff;
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.85rem;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.linkedin-btn img {
+  height: 16px;
+  width: 16px;
+  filter: brightness(0) invert(1); /* keeps the logo white */
+}
+
+.linkedin-btn:hover {
+  background: #005582;           /* darker hover blue */
+  transform: translateY(-1px);
+}
+.linkedin-btn {
+  box-shadow: 0 2px 6px rgba(0, 119, 181, 0.25);
+}
+
+
+
+    /* Main card */
+    .app {
+      background: var(--rawls-card-bg);
+      padding: 24px 24px 20px;
+      margin: 24px auto;
+      border-radius: 12px;
+      max-width: 1320px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+      border-top: 5px solid var(--rawls-red);
+    }
+
+    .app-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: "Roboto Condensed", system-ui, sans-serif;
+      font-weight: 700;
+      font-size: 1.8rem;
+      letter-spacing: 0.03em;
+      color: var(--rawls-red);
+    }
+
+    .app-subtitle {
+      font-size: 0.9rem;
+      color: #555;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 6px;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar-left {
+      font-size: 0.85rem;
+      color: #555;
+    }
+
+    .toolbar-right {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .pill-label {
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid #e0e0e0;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #666;
+      background: #fafafa;
+    }
+
+    .btn {
+      border-radius: 999px;
+      border: 1px solid var(--rawls-border);
+      padding: 5px 12px;
+      font-size: 0.8rem;
+      background: #f8f8f8;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.05s ease;
+    }
+
+    .btn span {
+      font-size: 1rem;
+      line-height: 1;
+    }
+
+    .btn:hover {
+      background: #ffffff;
+      border-color: var(--rawls-red);
+      transform: translateY(-0.5px);
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px 16px;
+      margin-top: 12px;
+      padding: 12px 12px 4px;
+      border-radius: 10px;
+      border: 1px solid var(--rawls-border);
+      background: linear-gradient(to bottom, #fafafa, #ffffff);
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    label {
+      font-weight: 600;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #555;
+    }
+
+    input[type="text"],
+    select {
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--rawls-border);
+      font-size: 0.85rem;
+      background: #fafafa;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+
+    input[type="text"]:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--rawls-red);
+      box-shadow: 0 0 0 2px rgba(186, 12, 47, 0.18);
+      background: #fff;
+    }
+
+    .checkbox-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      font-size: 0.85rem;
+      color: #444;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0px;
+      font-size: 0.85rem;
+    }
+/* Adjust column widths for cleaner layout */
+th:nth-child(2), td:nth-child(2) { width: 140px; } /* Position */
+th:nth-child(3), td:nth-child(3) { width: 160px; } /* Area */
+
+    th,
+    td {
+      padding: 8px 10px;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #fafafa;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #444;
+    }
+/* Light grey grid lines across table */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #e3e3e3; /* Outer border */
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+th,
+td {
+  padding: 10px 12px;
+  border: 1px solid #eaeaea; /* Inner grid lines */
+  text-align: left;
+}
+
+th {
+  background: #f8f8f8;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #444;
+}
+
+tr:hover {
+  background: #fafafa; /* Subtle hover effect */
+}
+/* Optional: cleaner border + shadow for the table wrapper */
+.table-container {
+  border-radius: 10px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.05);
+  overflow: hidden;
+  border: 1px solid #e0e0e0;
+  background: #fff;
+}
+
+
+    tr:nth-child(even) {
+      background: #fcfcfc;
+    }
+
+    tr:hover {
+      background: #f5f5ff;
+    }
+
+    #resultsCount {
+      font-weight: 500;
+      color: #444;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-right: 4px;
+      white-space: nowrap;
+    }
+
+    /* Neutral ranking */
+    .badge-blue {
+      background: #f8f8f8;
+      color: #333;
+      border: 1px solid #ddd;
+      border-radius: 999px;
+      padding: 2px 6px;
+      font-weight: 500;
+    }
+
+    /* Yes = green for both UTD & FT */
+    .badge-green,
+    .badge-gold {
+      background: #e8f5e9;
+      color: #2e7d32;
+      border: 1px solid rgba(46, 125, 50, 0.3);
+    }
+
+    .badge-no {
+      background: #f3f4f6;
+      color: #777;
+      border: 1px solid #ddd;
+    }
+  </style>
+</head>
+
+<body>
+  <header class="rawls-header">
+  <div class="rawls-header-inner">
+    <img class="rawls-logo" src="RawlsRlogo.jpeg" alt="Rawls College of Business logo">
+    <div class="rawls-header-brand">
+      <span class="rawls-header-brand-main">Rawls College of Business</span>
+      <span class="rawls-header-brand-sub">
+        Texas Tech University · Rawls College Research
+      </span>
+    </div>
+  </div>
+</header>
+
+
+
+  <div class="app">
+    <div class="app-header">
+      <h1>Rawls Faculty Publications Database</h1>
+      <div class="app-subtitle">Research Built on Rawls.</div>
+    </div>
+
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <span id="resultsCount">Loading publications...</span>
+      </div>
+      <div class="toolbar-right">
+  <button class="btn" id="clearFilters"><span>&#10006;</span> Clear filters</button>
+  <button class="btn" id="exportExcel"><span>&#128190;</span> Export to Excel</button>
+</div>
+    </div>
+
+    <div class="filters">
+      <div class="filter-group">
+        <label>Author's Name</label>
+        <input type="text" id="personSearch" placeholder="Search by Author">
+      </div>
+      <div class="filter-group">
+        <label>Article Title</label>
+        <input type="text" id="titleSearch" placeholder="Search by title">
+      </div>
+      <div class="filter-group">
+        <label>Journal Name</label>
+        <input type="text" id="journalSearch" placeholder="Search by journal">
+      </div>
+
+      <div class="filter-group">
+        <label for="areaSelect">Area</label>
+        <select id="areaSelect">
+          <option value="">All Areas</option>
+          <option value="School of Accounting">School of Accounting</option>
+          <option value="Accounting">Accounting</option>
+          <option value="Energy Commerce &">Energy Commerce &</option>
+          <option value="Finance">Finance</option>
+          <option value="Information Systems &">Information Systems & Quantitative Sciences (ISQS)</option>
+          <option value="Management">Management</option>
+          <option value="Marketing and Supply Chain">Marketing and Supply Chain</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="positionSelect">Position</label>
+        <select id="positionSelect">
+          <option value="">All Positions</option>
+          <option value="Assistant Professor">Assistant Professor</option>
+          <option value="Associate Professor">Associate Professor</option>
+          <option value="Clinical Faculty">Clinical Faculty</option>
+          <option value="Distinguished Professor">Distinguished Professor</option>
+          <option value="Endowed Professor">Endowed Professor</option>
+          <option value="Faculty">Faculty</option>
+          <option value="Lecturer">Lecturer</option>
+          <option value="Professor">Professor</option>
+          <option value="Staff">Staff</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>Year</label>
+        <select id="yearSelect"><option value="">All</option></select>
+      </div>
+
+      <div class="filter-group">
+        <label>UTD Journal</label>
+        <div class="checkbox-group">
+          <label><input type="checkbox" id="utdYes"> Yes</label>
+          <label><input type="checkbox" id="utdNo"> No</label>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <label>Financial Times Journal</label>
+        <div class="checkbox-group">
+          <label><input type="checkbox" id="ftYes"> Yes</label>
+          <label><input type="checkbox" id="ftNo"> No</label>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <label>Ranking</label>
+        <div class="checkbox-group">
+          <label><input type="checkbox" id="rank4"> 4</label>
+          <label><input type="checkbox" id="rank5"> 5</label>
+          <label><input type="checkbox" id="rank5star"> 5*</label>
+        </div>
+      </div>
+    </div>
+<div class="table-container" style="overflow:auto; max-height:500px;">
+      <table> 
+        <thead>
+  <tr>
+    <th>Person</th>
+    <th>Position</th>
+    <th>Area</th>
+    <th>Year</th>
+    <th>Article Title</th>
+    <th>Journal</th>
+    <th>Ranking</th>
+    <th>UTD</th>
+    <th>Financial Times</th>
+  </tr>
+</thead>
+
+        <tbody id="resultsBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+
+
+  <script>
+  let data = [];
+  let currentRows = [];
+
+  const elements = {
+    personSearch: document.getElementById("personSearch"),
+    titleSearch: document.getElementById("titleSearch"),
+    journalSearch: document.getElementById("journalSearch"),
+    areaSelect: document.getElementById("areaSelect"),
+    positionSelect: document.getElementById("positionSelect"),
+    yearSelect: document.getElementById("yearSelect"),
+    utdYes: document.getElementById("utdYes"),
+    utdNo: document.getElementById("utdNo"),
+    ftYes: document.getElementById("ftYes"),
+    ftNo: document.getElementById("ftNo"),
+    rank4: document.getElementById("rank4"),
+    rank5: document.getElementById("rank5"),
+    rank5star: document.getElementById("rank5star"),
+    resultsBody: document.getElementById("resultsBody"),
+    resultsCount: document.getElementById("resultsCount"),
+    clearFilters: document.getElementById("clearFilters"),
+    exportExcel: document.getElementById("exportExcel"),
+  };
+
+  document.addEventListener("DOMContentLoaded", () => {
+    loadWorkbookFromServer();
+    attachListeners();
+  });
+
+  // Find the sheet that has the expected headers
+  function findSheetWithHeaders(workbook) {
+    const targetHeaders = [
+      "personname",
+      "position",
+      "area",
+      "year",
+      "articletitle",
+      "journalname",
+      "ranking - updated",
+      "utd journal",
+      "financial times journal",
+    ];
+
+    let bestSheet = workbook.SheetNames[0];
+
+    workbook.SheetNames.forEach(name => {
+      const sheet = workbook.Sheets[name];
+      const rows = XLSX.utils.sheet_to_json(sheet, {
+        header: 1,
+        range: 0,
+        blankrows: false,
+      });
+
+      const headerRow = rows[0] || [];
+      const headerSet = new Set(
+        headerRow.map(h => String(h || "").trim().toLowerCase())
+      );
+
+      const matchesAll = targetHeaders.every(h => headerSet.has(h));
+      if (matchesAll) bestSheet = name;
+    });
+
+    return bestSheet;
+  }
+
+  // Normalize object keys: "Journalname  " -> "journalname"
+  function normalizeRow(row) {
+    const norm = {};
+    Object.keys(row).forEach(key => {
+      const nk = String(key || "").trim().toLowerCase();
+      norm[nk] = row[key];
+    });
+    return norm;
+  }
+
+  function loadWorkbookFromServer() {
+    // match exact filename & case in repo
+    fetch("Database.xlsx")
+      .then(res => {
+        console.log("Fetch response:", res.status, res.statusText);
+        if (!res.ok) throw new Error("Failed to load Database.xlsx");
+        return res.arrayBuffer();
+      })
+      .then(buf => {
+        const workbook = XLSX.read(buf, { type: "array" });
+
+        const sheetName = findSheetWithHeaders(workbook);
+        console.log("Using sheet:", sheetName, "All sheets:", workbook.SheetNames);
+
+        const sheet = workbook.Sheets[sheetName];
+        const json = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+
+        console.log("Raw keys from first row:", Object.keys(json[0] || {}));
+
+        data = json.map(row => {
+          const r = normalizeRow(row);
+          return {
+            personName: r["personname"] || "",
+            position: r["position"] || "",
+            area: r["area"] || "",
+            year: r["year"] || "",
+            articleTitle: r["articletitle"] || "",
+            journalName: r["journalname"] || "",
+            ranking: String(r["ranking - updated"] || "").trim(),
+            utdJournal: String(r["utd journal"] || "").trim(),              // "Yes"/"No"
+            ftJournal: String(r["financial times journal"] || "").trim(),  // "Yes"/"No"
+          };
+        });
+
+        populateDropdowns();
+        renderTable(data);
+      })
+      .catch(err => {
+        console.error("Error loading workbook:", err);
+        elements.resultsCount.textContent =
+          "Error loading Database.xlsx. Open DevTools → Console for details.";
+      });
+  }
+
+  function populateDropdowns() {
+    const addOptions = (select, values) => {
+      const prevValue = select.value;
+      select.innerHTML = "<option value=''>All</option>";
+      [...new Set(values.filter(v => v))]
+        .sort()
+        .forEach(v => {
+          const opt = document.createElement("option");
+          opt.value = v;
+          opt.textContent = v;
+          select.appendChild(opt);
+        });
+      if ([...select.options].some(o => o.value === prevValue)) {
+        select.value = prevValue;
+      }
+    };
+
+    addOptions(elements.areaSelect, data.map(d => d.area));
+    addOptions(elements.positionSelect, data.map(d => d.position));
+    addOptions(elements.yearSelect, data.map(d => d.year));
+  }
+
+  function renderTable(rows) {
+    currentRows = rows.slice(); // keep a copy of whatever is currently displayed
+
+    elements.resultsBody.innerHTML = "";
+    rows.forEach(r => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${r.personName}</td>
+     <td>${r.position || ""}</td>
+<td>${r.area || ""}</td>
+        <td>${r.year}</td>
+        <td>${r.articleTitle}</td>
+        <td>${r.journalName}</td>
+        <td>${r.ranking ? `<span class="badge badge-blue">${r.ranking}</span>` : ""}</td>
+        <td>${r.utdJournal === "Yes"
+            ? `<span class="badge badge-green">Yes</span>`
+            : (r.utdJournal === "No" ? `<span class="badge badge-no">No</span>` : "")}</td>
+        <td>${r.ftJournal === "Yes"
+            ? `<span class="badge badge-green">Yes</span>`
+            : (r.ftJournal === "No" ? `<span class="badge badge-no">No</span>` : "")}</td>
+      `;
+      elements.resultsBody.appendChild(tr);
+    });
+    elements.resultsCount.textContent = `Showing ${rows.length} results`;
+  }
+
+  function exportFilteredToExcel() {
+    if (!currentRows || currentRows.length === 0) {
+      alert("There are no rows to export.");
+      return;
+    }
+
+    // Map to friendly column headers for Excel
+    const exportData = currentRows.map(r => ({
+      "Person": r.personName,
+      "Position": r.position,
+      "Area": r.area,
+      "Year": r.year,
+      "Article Title": r.articleTitle,
+      "Journal": r.journalName,
+      "Ranking": r.ranking,
+      "UTD Journal": r.utdJournal,
+      "Financial Times Journal": r.ftJournal,
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Filtered Results");
+
+    XLSX.writeFile(wb, "Rawls_Publications_Filtered.xlsx");
+  }
+
+  function applyFilters() {
+    const pq = elements.personSearch.value.toLowerCase();
+    const tq = elements.titleSearch.value.toLowerCase();
+    const jq = elements.journalSearch.value.toLowerCase();
+    const area = elements.areaSelect.value;
+    const pos = elements.positionSelect.value;
+    const yr = elements.yearSelect.value;
+    const utdY = elements.utdYes.checked, utdN = elements.utdNo.checked;
+    const ftY = elements.ftYes.checked, ftN = elements.ftNo.checked;
+    const r4 = elements.rank4.checked, r5 = elements.rank5.checked, r5s = elements.rank5star.checked;
+
+    const filtered = data.filter(d => {
+      if (pq && !d.personName.toLowerCase().includes(pq)) return false;
+      if (tq && !d.articleTitle.toLowerCase().includes(tq)) return false;
+      if (jq && !d.journalName.toLowerCase().includes(jq)) return false;
+      if (area && d.area !== area) return false;
+      if (pos && d.position !== pos) return false;
+      if (yr && String(d.year) !== String(yr)) return false;
+
+      if ((utdY || utdN) &&
+          !((utdY && d.utdJournal === "Yes") || (utdN && d.utdJournal === "No"))) {
+        return false;
+      }
+
+      if ((ftY || ftN) &&
+          !((ftY && d.ftJournal === "Yes") || (ftN && d.ftJournal === "No"))) {
+        return false;
+      }
+
+      if ((r4 || r5 || r5s) &&
+          !((r4 && d.ranking === "4") ||
+            (r5 && d.ranking === "5") ||
+            (r5s && d.ranking === "5*"))) {
+        return false;
+      }
+
+      return true;
+    });
+
+    renderTable(filtered);
+  }
+
+  function attachListeners() {
+    [
+      elements.personSearch, elements.titleSearch, elements.journalSearch,
+      elements.areaSelect, elements.positionSelect, elements.yearSelect,
+      elements.utdYes, elements.utdNo, elements.ftYes, elements.ftNo,
+      elements.rank4, elements.rank5, elements.rank5star
+    ].forEach(el => el.addEventListener("input", applyFilters));
+
+    if (elements.clearFilters) {
+      elements.clearFilters.addEventListener("click", () => {
+        elements.personSearch.value = "";
+        elements.titleSearch.value = "";
+        elements.journalSearch.value = "";
+        elements.areaSelect.value = "";
+        elements.positionSelect.value = "";
+        elements.yearSelect.value = "";
+        elements.utdYes.checked = false;
+        elements.utdNo.checked = false;
+        elements.ftYes.checked = false;
+        elements.ftNo.checked = false;
+        elements.rank4.checked = false;
+        elements.rank5.checked = false;
+        elements.rank5star.checked = false;
+        renderTable(data);
+      });
+    }
+
+    if (elements.exportExcel) {
+      elements.exportExcel.addEventListener("click", exportFilteredToExcel);
+    }
+  }
+</script>
+<footer class="rawls-footer">
+  <div class="rawls-footer-inner">
+    <span>© 2025 Rawls College Research</span>
+    <a
+      href="https://www.linkedin.com/showcase/research-rawls-college-of-business/"
+      target="_blank"
+      class="linkedin-btn"
+      aria-label="Visit Rawls College Research on LinkedIn"
+    >
+      <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" alt="LinkedIn logo">
+      Follow us on LinkedIn
+    </a>
+  </div>
+</footer>
+
+</body>
+</html>

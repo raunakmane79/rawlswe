@@ -33,108 +33,101 @@
       color: var(--rawls-black);
     }
 
-    /* Top black TTU-style bar */
- /* --- TTU Rawls-style black header --- */
-.rawls-header {
-  background: linear-gradient(to right, #000 60%, #111 100%);                   /* solid black bar */
-  border-bottom: 4px solid #ba0c2f;      /* TTU red underline accent */
-  color: #fff;
-  padding: 10px 28px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-  position: sticky;                      /* keeps bar visible when scrolling */
-  top: 0;
-  z-index: 1000;
-}
+    /* --- TTU Rawls-style black header --- */
+    .rawls-header {
+      background: linear-gradient(to right, #000 60%, #111 100%);
+      border-bottom: 4px solid #ba0c2f;
+      color: #fff;
+      padding: 10px 28px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
 
-.rawls-header-inner {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 16px;
-  max-width: 1320px;
-  margin: 0 auto;
-}
+    .rawls-header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 16px;
+      max-width: 1320px;
+      margin: 0 auto;
+    }
 
-/* Logo sizing */
-.rawls-logo {
-  height: 46px;          /* perfect balance next to text */
-  width: auto;
-  object-fit: contain;
-}
+    .rawls-logo {
+      height: 46px;
+      width: auto;
+      object-fit: contain;
+    }
 
-/* Branding text */
-.rawls-header-brand {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.25;
-}
+    .rawls-header-brand {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.25;
+    }
 
-.rawls-header-brand-main {
-  font-family: "Roboto Condensed", sans-serif;
-  font-weight: 700;
-  font-size: 1.2rem;
-  color: #fff;
-  letter-spacing: 0.02em;
-}
+    .rawls-header-brand-main {
+      font-family: "Roboto Condensed", sans-serif;
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: #fff;
+      letter-spacing: 0.02em;
+    }
 
-.rawls-header-brand-sub {
-  font-size: 0.85rem;
-  color: #ccc;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-/* --- Footer Section --- */
- 
-.rawls-footer {
-  margin: 0;
-  flex-shrink: 0; 
-  background: #000;
-  border-top: 4px solid #ba0c2f;
-  color: #f0f0f0;
-  padding: 12px 28px;
-  font-size: 0.85rem;
-  margin-top: 40px;
-}
+    .rawls-header-brand-sub {
+      font-size: 0.85rem;
+      color: #ccc;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
 
-.rawls-footer-inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  max-width: 1320px;
-  margin: 0 auto;
-  flex-wrap: wrap;
-  gap: 12px;
-}
+    /* --- Footer Section --- */
+    .rawls-footer {
+      margin: 0;
+      flex-shrink: 0;
+      background: #000;
+      border-top: 4px solid #ba0c2f;
+      color: #f0f0f0;
+      padding: 12px 28px;
+      font-size: 0.85rem;
+      margin-top: 40px;
+    }
 
-.linkedin-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: #0077b5;           /* LinkedIn blue */
-  color: #fff;
-  text-decoration: none;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-weight: 500;
-  font-size: 0.85rem;
-  transition: background 0.2s ease, transform 0.15s ease;
-}
+    .rawls-footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1320px;
+      margin: 0 auto;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
 
-.linkedin-btn img {
-  height: 16px;
-  width: 16px;
-  filter: brightness(0) invert(1); /* keeps the logo white */
-}
+    .linkedin-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #0077b5;
+      color: #fff;
+      text-decoration: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-weight: 500;
+      font-size: 0.85rem;
+      transition: background 0.2s ease, transform 0.15s ease;
+      box-shadow: 0 2px 6px rgba(0, 119, 181, 0.25);
+    }
 
-.linkedin-btn:hover {
-  background: #005582;           /* darker hover blue */
-  transform: translateY(-1px);
-}
-.linkedin-btn {
-  box-shadow: 0 2px 6px rgba(0, 119, 181, 0.25);
-}
+    .linkedin-btn img {
+      height: 16px;
+      width: 16px;
+      filter: brightness(0) invert(1);
+    }
 
-
+    .linkedin-btn:hover {
+      background: #005582;
+      transform: translateY(-1px);
+    }
 
     /* Main card */
     .app {
@@ -278,77 +271,52 @@
       color: #444;
     }
 
+    /* Table + grid */
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 0px;
-      font-size: 0.85rem;
+      border: 1px solid #e3e3e3;
+      border-radius: 8px;
+      overflow: hidden;
     }
-/* Adjust column widths for cleaner layout */
-th:nth-child(2), td:nth-child(2) { width: 140px; } /* Position */
-th:nth-child(3), td:nth-child(3) { width: 160px; } /* Area */
+
+    th:nth-child(2), td:nth-child(2) { width: 140px; } /* Position */
+    th:nth-child(3), td:nth-child(3) { width: 160px; } /* Area */
 
     th,
     td {
-      padding: 8px 10px;
-      border-bottom: 1px solid #eee;
+      padding: 10px 12px;
+      border: 1px solid #eaeaea;
       text-align: left;
       vertical-align: top;
     }
 
     th {
-      background: #fafafa;
-      position: sticky;
-      top: 0;
-      z-index: 1;
+      background: #f8f8f8;
       font-size: 0.75rem;
       text-transform: uppercase;
       letter-spacing: 0.08em;
       color: #444;
+      position: sticky;
+      top: 0;
+      z-index: 1;
     }
-/* Light grey grid lines across table */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  border: 1px solid #e3e3e3; /* Outer border */
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-th,
-td {
-  padding: 10px 12px;
-  border: 1px solid #eaeaea; /* Inner grid lines */
-  text-align: left;
-}
-
-th {
-  background: #f8f8f8;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #444;
-}
-
-tr:hover {
-  background: #fafafa; /* Subtle hover effect */
-}
-/* Optional: cleaner border + shadow for the table wrapper */
-.table-container {
-  border-radius: 10px;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.05);
-  overflow: hidden;
-  border: 1px solid #e0e0e0;
-  background: #fff;
-}
-
 
     tr:nth-child(even) {
       background: #fcfcfc;
     }
 
     tr:hover {
-      background: #f5f5ff;
+      background: #fafafa;
+    }
+
+    .table-container {
+      border-radius: 10px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.05);
+      overflow: auto;
+      border: 1px solid #e0e0e0;
+      background: #fff;
+      max-height: 500px;
     }
 
     #resultsCount {
@@ -367,7 +335,6 @@ tr:hover {
       white-space: nowrap;
     }
 
-    /* Neutral ranking */
     .badge-blue {
       background: #f8f8f8;
       color: #333;
@@ -377,7 +344,6 @@ tr:hover {
       font-weight: 500;
     }
 
-    /* Yes = green for both UTD & FT */
     .badge-green,
     .badge-gold {
       background: #e8f5e9;
@@ -394,7 +360,7 @@ tr:hover {
 </head>
 
 <body>
-  <header class="rawls-header">
+<header class="rawls-header">
   <div class="rawls-header-inner">
     <img class="rawls-logo" src="RawlsRlogo.jpeg" alt="Rawls College of Business logo">
     <div class="rawls-header-brand">
@@ -406,128 +372,141 @@ tr:hover {
   </div>
 </header>
 
+<div class="app">
+  <div class="app-header">
+    <h1>Rawls Faculty Publications Database</h1>
+    <div class="app-subtitle">Research Built on Rawls.</div>
+  </div>
 
-
-  <div class="app">
-    <div class="app-header">
-      <h1>Rawls Faculty Publications Database</h1>
-      <div class="app-subtitle">Research Built on Rawls.</div>
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <span id="resultsCount">Loading publications...</span>
     </div>
-
-    <div class="toolbar">
-      <div class="toolbar-left">
-        <span id="resultsCount">Loading publications...</span>
-      </div>
-      <div class="toolbar-right">
-  <button class="btn" id="clearFilters"><span>&#10006;</span> Clear filters</button>
-  <button class="btn" id="exportExcel"><span>&#128190;</span> Export to Excel</button>
-</div>
-    </div>
-
-    <div class="filters">
-      <div class="filter-group">
-        <label>Author's Name</label>
-        <input type="text" id="personSearch" placeholder="Search by Author">
-      </div>
-      <div class="filter-group">
-        <label>Article Title</label>
-        <input type="text" id="titleSearch" placeholder="Search by title">
-      </div>
-      <div class="filter-group">
-        <label>Journal Name</label>
-        <input type="text" id="journalSearch" placeholder="Search by journal">
-      </div>
-
-      <div class="filter-group">
-        <label for="areaSelect">Area</label>
-        <select id="areaSelect">
-          <option value="">All Areas</option>
-          <option value="School of Accounting">School of Accounting</option>
-          <option value="Accounting">Accounting</option>
-          <option value="Energy Commerce &">Energy Commerce &</option>
-          <option value="Finance">Finance</option>
-          <option value="Information Systems &">Information Systems & Quantitative Sciences (ISQS)</option>
-          <option value="Management">Management</option>
-          <option value="Marketing and Supply Chain">Marketing and Supply Chain</option>
-          <option value="Other">Other</option>
-        </select>
-      </div>
-
-      <div class="filter-group">
-        <label for="positionSelect">Position</label>
-        <select id="positionSelect">
-          <option value="">All Positions</option>
-          <option value="Assistant Professor">Assistant Professor</option>
-          <option value="Associate Professor">Associate Professor</option>
-          <option value="Clinical Faculty">Clinical Faculty</option>
-          <option value="Distinguished Professor">Distinguished Professor</option>
-          <option value="Endowed Professor">Endowed Professor</option>
-          <option value="Faculty">Faculty</option>
-          <option value="Lecturer">Lecturer</option>
-          <option value="Professor">Professor</option>
-          <option value="Staff">Staff</option>
-        </select>
-      </div>
-
-      <div class="filter-group">
-        <label>Year</label>
-        <select id="yearSelect"><option value="">All</option></select>
-      </div>
-
-      <div class="filter-group">
-        <label>UTD Journal</label>
-        <div class="checkbox-group">
-          <label><input type="checkbox" id="utdYes"> Yes</label>
-          <label><input type="checkbox" id="utdNo"> No</label>
-        </div>
-      </div>
-
-      <div class="filter-group">
-        <label>Financial Times Journal</label>
-        <div class="checkbox-group">
-          <label><input type="checkbox" id="ftYes"> Yes</label>
-          <label><input type="checkbox" id="ftNo"> No</label>
-        </div>
-      </div>
-
-      <div class="filter-group">
-        <label>Ranking</label>
-        <div class="checkbox-group">
-          <label><input type="checkbox" id="rank4"> 4</label>
-          <label><input type="checkbox" id="rank5"> 5</label>
-          <label><input type="checkbox" id="rank5star"> 5*</label>
-        </div>
-      </div>
-    </div>
-<div class="table-container" style="overflow:auto; max-height:500px;">
-      <table> 
-        <thead>
-  <tr>
-    <th>Person</th>
-    <th>Position</th>
-    <th>Area</th>
-    <th>Year</th>
-    <th>Article Title</th>
-    <th>Journal</th>
-    <th>Ranking</th>
-    <th>UTD</th>
-    <th>Financial Times</th>
-  </tr>
-</thead>
-
-        <tbody id="resultsBody"></tbody>
-      </table>
+    <div class="toolbar-right">
+      <button class="btn" id="clearFilters"><span>&#10006;</span> Clear filters</button>
+      <button class="btn" id="exportExcel"><span>&#128190;</span> Export to Excel</button>
     </div>
   </div>
 
+  <div class="filters">
+    <!-- AUTHOR FILTER: split into Last / First + Exact match -->
+    <div class="filter-group">
+      <label>Author's Name</label>
+      <div style="display:flex; gap:6px; flex-wrap:wrap;">
+        <input type="text" id="lastNameSearch" placeholder="Last name">
+        <input type="text" id="firstNameSearch" placeholder="First name">
+      </div>
+      <label style="font-size:0.75rem; font-weight:400; text-transform:none; letter-spacing:0; margin-top:4px; color:#555;">
+        <input type="checkbox" id="matchExactAuthor" style="margin-right:4px;">
+        Match entire cell contents
+      </label>
+    </div>
 
+    <div class="filter-group">
+      <label>Article Title</label>
+      <input type="text" id="titleSearch" placeholder="Search by title">
+    </div>
 
-  <script>
+    <div class="filter-group">
+      <label>Journal Name</label>
+      <input type="text" id="journalSearch" placeholder="Search by journal">
+    </div>
+
+    <!-- MULTI-SELECT: AREA -->
+    <div class="filter-group">
+      <label for="areaSelect">Area</label>
+      <select id="areaSelect" multiple size="5">
+        <option value="">All Areas</option>
+        <option value="School of Accounting">School of Accounting</option>
+        <option value="Accounting">Accounting</option>
+        <option value="Energy Commerce &">Energy Commerce &</option>
+        <option value="Finance">Finance</option>
+        <option value="Information Systems &">Information Systems & Quantitative Sciences (ISQS)</option>
+        <option value="Management">Management</option>
+        <option value="Marketing and Supply Chain">Marketing and Supply Chain</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+
+    <!-- MULTI-SELECT: POSITION -->
+    <div class="filter-group">
+      <label for="positionSelect">Position</label>
+      <select id="positionSelect" multiple size="5">
+        <option value="">All Positions</option>
+        <option value="Assistant Professor">Assistant Professor</option>
+        <option value="Associate Professor">Associate Professor</option>
+        <option value="Clinical Faculty">Clinical Faculty</option>
+        <option value="Distinguished Professor">Distinguished Professor</option>
+        <option value="Endowed Professor">Endowed Professor</option>
+        <option value="Faculty">Faculty</option>
+        <option value="Lecturer">Lecturer</option>
+        <option value="Professor">Professor</option>
+        <option value="Staff">Staff</option>
+      </select>
+    </div>
+
+    <!-- MULTI-SELECT: YEAR -->
+    <div class="filter-group">
+      <label>Year</label>
+      <select id="yearSelect" multiple size="5">
+        <option value="">All</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>UTD Journal</label>
+      <div class="checkbox-group">
+        <label><input type="checkbox" id="utdYes"> Yes</label>
+        <label><input type="checkbox" id="utdNo"> No</label>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <label>Financial Times Journal</label>
+      <div class="checkbox-group">
+        <label><input type="checkbox" id="ftYes"> Yes</label>
+        <label><input type="checkbox" id="ftNo"> No</label>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <label>Rawls journal list rankings</label>
+      <div class="checkbox-group">
+        <label><input type="checkbox" id="rank4"> 4</label>
+        <label><input type="checkbox" id="rank5"> 5</label>
+        <label><input type="checkbox" id="rank5star"> 5*</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Person</th>
+          <th>Position</th>
+          <th>Area</th>
+          <th>Year</th>
+          <th>Article Title</th>
+          <th>Journal</th>
+          <th>Rawls journal list rankings</th>
+          <th>UTD</th>
+          <th>Financial Times</th>
+        </tr>
+      </thead>
+      <tbody id="resultsBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
   let data = [];
   let currentRows = [];
 
   const elements = {
-    personSearch: document.getElementById("personSearch"),
+    lastNameSearch: document.getElementById("lastNameSearch"),
+    firstNameSearch: document.getElementById("firstNameSearch"),
+    matchExactAuthor: document.getElementById("matchExactAuthor"),
     titleSearch: document.getElementById("titleSearch"),
     journalSearch: document.getElementById("journalSearch"),
     areaSelect: document.getElementById("areaSelect"),
@@ -598,7 +577,6 @@ tr:hover {
   }
 
   function loadWorkbookFromServer() {
-    // match exact filename & case in repo
     fetch("Database.xlsx")
       .then(res => {
         console.log("Fetch response:", res.status, res.statusText);
@@ -618,8 +596,20 @@ tr:hover {
 
         data = json.map(row => {
           const r = normalizeRow(row);
+          const fullName = r["personname"] || "";
+          let lastName = "";
+          let firstName = "";
+
+          if (fullName) {
+            const parts = String(fullName).split(",");
+            lastName = (parts[0] || "").trim();
+            firstName = (parts.slice(1).join(",") || "").trim();
+          }
+
           return {
-            personName: r["personname"] || "",
+            personName: fullName,
+            lastName: lastName,
+            firstName: firstName,
             position: r["position"] || "",
             area: r["area"] || "",
             year: r["year"] || "",
@@ -643,7 +633,7 @@ tr:hover {
 
   function populateDropdowns() {
     const addOptions = (select, values) => {
-      const prevValue = select.value;
+      const prevValues = Array.from(select.selectedOptions || []).map(o => o.value);
       select.innerHTML = "<option value=''>All</option>";
       [...new Set(values.filter(v => v))]
         .sort()
@@ -653,9 +643,13 @@ tr:hover {
           opt.textContent = v;
           select.appendChild(opt);
         });
-      if ([...select.options].some(o => o.value === prevValue)) {
-        select.value = prevValue;
-      }
+
+      // Try to restore previous selections if they still exist
+      Array.from(select.options).forEach(opt => {
+        if (prevValues.includes(opt.value)) {
+          opt.selected = true;
+        }
+      });
     };
 
     addOptions(elements.areaSelect, data.map(d => d.area));
@@ -671,18 +665,22 @@ tr:hover {
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>${r.personName}</td>
-     <td>${r.position || ""}</td>
-<td>${r.area || ""}</td>
+        <td>${r.position || ""}</td>
+        <td>${r.area || ""}</td>
         <td>${r.year}</td>
         <td>${r.articleTitle}</td>
         <td>${r.journalName}</td>
         <td>${r.ranking ? `<span class="badge badge-blue">${r.ranking}</span>` : ""}</td>
-        <td>${r.utdJournal === "Yes"
+        <td>${
+          r.utdJournal === "Yes"
             ? `<span class="badge badge-green">Yes</span>`
-            : (r.utdJournal === "No" ? `<span class="badge badge-no">No</span>` : "")}</td>
-        <td>${r.ftJournal === "Yes"
+            : (r.utdJournal === "No" ? `<span class="badge badge-no">No</span>` : "")
+        }</td>
+        <td>${
+          r.ftJournal === "Yes"
             ? `<span class="badge badge-green">Yes</span>`
-            : (r.ftJournal === "No" ? `<span class="badge badge-no">No</span>` : "")}</td>
+            : (r.ftJournal === "No" ? `<span class="badge badge-no">No</span>` : "")
+        }</td>
       `;
       elements.resultsBody.appendChild(tr);
     });
@@ -703,7 +701,7 @@ tr:hover {
       "Year": r.year,
       "Article Title": r.articleTitle,
       "Journal": r.journalName,
-      "Ranking": r.ranking,
+      "Rawls journal list rankings": r.ranking,
       "UTD Journal": r.utdJournal,
       "Financial Times Journal": r.ftJournal,
     }));
@@ -715,35 +713,66 @@ tr:hover {
     XLSX.writeFile(wb, "Rawls_Publications_Filtered.xlsx");
   }
 
+  function getMultiSelectValues(selectEl) {
+    if (!selectEl) return [];
+    return Array.from(selectEl.selectedOptions || [])
+      .map(o => o.value)
+      .filter(v => v);  // ignore blank "All"
+  }
+
   function applyFilters() {
-    const pq = elements.personSearch.value.toLowerCase();
-    const tq = elements.titleSearch.value.toLowerCase();
-    const jq = elements.journalSearch.value.toLowerCase();
-    const area = elements.areaSelect.value;
-    const pos = elements.positionSelect.value;
-    const yr = elements.yearSelect.value;
+    const lastQ = (elements.lastNameSearch.value || "").trim().toLowerCase();
+    const firstQ = (elements.firstNameSearch.value || "").trim().toLowerCase();
+    const matchExactAuthor = elements.matchExactAuthor.checked;
+
+    const tq = (elements.titleSearch.value || "").toLowerCase();
+    const jq = (elements.journalSearch.value || "").toLowerCase();
+
+    const areaValues = getMultiSelectValues(elements.areaSelect);
+    const posValues = getMultiSelectValues(elements.positionSelect);
+    const yearValues = getMultiSelectValues(elements.yearSelect);
+
     const utdY = elements.utdYes.checked, utdN = elements.utdNo.checked;
     const ftY = elements.ftYes.checked, ftN = elements.ftNo.checked;
     const r4 = elements.rank4.checked, r5 = elements.rank5.checked, r5s = elements.rank5star.checked;
 
     const filtered = data.filter(d => {
-      if (pq && !d.personName.toLowerCase().includes(pq)) return false;
+      const dLast = (d.lastName || "").toLowerCase();
+      const dFirst = (d.firstName || "").toLowerCase();
+
+      // AUTHOR FILTER
+      if (matchExactAuthor) {
+        // Exact match per cell (case-insensitive). Only apply if user typed something.
+        if (lastQ && dLast !== lastQ) return false;
+        if (firstQ && dFirst !== firstQ) return false;
+      } else {
+        // Partial / contains match
+        if (lastQ && !dLast.includes(lastQ)) return false;
+        if (firstQ && !dFirst.includes(firstQ)) return false;
+      }
+
+      // TITLE / JOURNAL
       if (tq && !d.articleTitle.toLowerCase().includes(tq)) return false;
       if (jq && !d.journalName.toLowerCase().includes(jq)) return false;
-      if (area && d.area !== area) return false;
-      if (pos && d.position !== pos) return false;
-      if (yr && String(d.year) !== String(yr)) return false;
 
+      // AREA / POSITION / YEAR (multi-select)
+      if (areaValues.length && !areaValues.includes(d.area)) return false;
+      if (posValues.length && !posValues.includes(d.position)) return false;
+      if (yearValues.length && !yearValues.includes(String(d.year))) return false;
+
+      // UTD YES/NO
       if ((utdY || utdN) &&
           !((utdY && d.utdJournal === "Yes") || (utdN && d.utdJournal === "No"))) {
         return false;
       }
 
+      // FT YES/NO
       if ((ftY || ftN) &&
           !((ftY && d.ftJournal === "Yes") || (ftN && d.ftJournal === "No"))) {
         return false;
       }
 
+      // RANKINGS
       if ((r4 || r5 || r5s) &&
           !((r4 && d.ranking === "4") ||
             (r5 && d.ranking === "5") ||
@@ -758,21 +787,53 @@ tr:hover {
   }
 
   function attachListeners() {
-    [
-      elements.personSearch, elements.titleSearch, elements.journalSearch,
-      elements.areaSelect, elements.positionSelect, elements.yearSelect,
-      elements.utdYes, elements.utdNo, elements.ftYes, elements.ftNo,
-      elements.rank4, elements.rank5, elements.rank5star
-    ].forEach(el => el.addEventListener("input", applyFilters));
+    const inputHandlers = [
+      elements.lastNameSearch,
+      elements.firstNameSearch,
+      elements.titleSearch,
+      elements.journalSearch,
+      elements.matchExactAuthor,
+      elements.utdYes,
+      elements.utdNo,
+      elements.ftYes,
+      elements.ftNo,
+      elements.rank4,
+      elements.rank5,
+      elements.rank5star
+    ];
+
+    inputHandlers.forEach(el => {
+      if (el) el.addEventListener("input", applyFilters);
+    });
+
+    const changeHandlers = [
+      elements.areaSelect,
+      elements.positionSelect,
+      elements.yearSelect
+    ];
+
+    changeHandlers.forEach(el => {
+      if (el) el.addEventListener("change", applyFilters);
+    });
 
     if (elements.clearFilters) {
       elements.clearFilters.addEventListener("click", () => {
-        elements.personSearch.value = "";
+        // Author
+        elements.lastNameSearch.value = "";
+        elements.firstNameSearch.value = "";
+        elements.matchExactAuthor.checked = false;
+
+        // Text filters
         elements.titleSearch.value = "";
         elements.journalSearch.value = "";
-        elements.areaSelect.value = "";
-        elements.positionSelect.value = "";
-        elements.yearSelect.value = "";
+
+        // Multi-selects: clear all selections
+        [elements.areaSelect, elements.positionSelect, elements.yearSelect].forEach(sel => {
+          if (!sel) return;
+          Array.from(sel.options).forEach(o => o.selected = false);
+        });
+
+        // Checkboxes
         elements.utdYes.checked = false;
         elements.utdNo.checked = false;
         elements.ftYes.checked = false;
@@ -780,6 +841,7 @@ tr:hover {
         elements.rank4.checked = false;
         elements.rank5.checked = false;
         elements.rank5star.checked = false;
+
         renderTable(data);
       });
     }
@@ -789,6 +851,7 @@ tr:hover {
     }
   }
 </script>
+
 <footer class="rawls-footer">
   <div class="rawls-footer-inner">
     <span>© 2025 Rawls College Research</span>
@@ -806,4 +869,5 @@ tr:hover {
 
 </body>
 </html>
+
 

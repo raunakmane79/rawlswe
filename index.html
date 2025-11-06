@@ -503,9 +503,9 @@ th:nth-child(2), td:nth-child(2) { width: 160px; }
     <input type="text" id="firstNameSearch" placeholder="First name (e.g., Tingting)">
   </div>
   <label class="name-exact">
-    <input type="checkbox" id="matchExactName">
-    Match entire cell contents
-  </label>
+  <input type="checkbox" id="masterNameSearch">
+  Master search
+</label>
 </div>
 
     <div class="filter-group">
@@ -599,7 +599,7 @@ th:nth-child(2), td:nth-child(2) { width: 160px; }
   const elements = {
     lastNameSearch: document.getElementById("lastNameSearch"),
     firstNameSearch: document.getElementById("firstNameSearch"),
-    matchExactName: document.getElementById("matchExactName"),
+masterNameSearch: document.getElementById("masterNameSearch"),
     titleSearch: document.getElementById("titleSearch"),
     journalSearch: document.getElementById("journalSearch"),
     utdYes: document.getElementById("utdYes"),
@@ -891,8 +891,9 @@ th:nth-child(2), td:nth-child(2) { width: 160px; }
 
   function applyFilters() {
     const lnq = elements.lastNameSearch.value.trim().toLowerCase();
-    const fnq = elements.firstNameSearch.value.trim().toLowerCase();
-    const matchExact = elements.matchExactName.checked;
+const fnq = elements.firstNameSearch.value.trim().toLowerCase();
+const masterSearch = elements.masterNameSearch.checked;
+
 
     const tq = elements.titleSearch.value.toLowerCase();
     const jq = elements.journalSearch.value.toLowerCase();
@@ -906,17 +907,34 @@ th:nth-child(2), td:nth-child(2) { width: 160px; }
     const r4 = elements.rank4.checked, r5 = elements.rank5.checked, r5s = elements.rank5star.checked;
 
     const filtered = data.filter(d => {
-      // Last name filter
-      if (lnq) {
-        const ln = (d.lastName || "").toLowerCase();
-        if (matchExact ? (ln !== lnq) : !ln.includes(lnq)) return false;
-      }
+    // Last name input
+if (lnq) {
+  const ln = (d.lastName || "").toLowerCase();
+  const fn = (d.firstName || "").toLowerCase();
 
-      // First name filter
-      if (fnq) {
-        const fn = (d.firstName || "").toLowerCase();
-        if (matchExact ? (fn !== fnq) : !fn.includes(fnq)) return false;
-      }
+  if (masterSearch) {
+    // search lnq in BOTH columns
+    if (!ln.includes(lnq) && !fn.includes(lnq)) return false;
+  } else {
+    // normal: only search last-name column
+    if (!ln.includes(lnq)) return false;
+  }
+}
+
+// First name input
+if (fnq) {
+  const ln = (d.lastName || "").toLowerCase();
+  const fn = (d.firstName || "").toLowerCase();
+
+  if (masterSearch) {
+    // search fnq in BOTH columns
+    if (!fn.includes(fnq) && !ln.includes(fnq)) return false;
+  } else {
+    // normal: only search first-name column
+    if (!fn.includes(fnq)) return false;
+  }
+}
+
 
       // Title / journal filters
       if (tq && !d.articleTitle.toLowerCase().includes(tq)) return false;
@@ -956,7 +974,7 @@ th:nth-child(2), td:nth-child(2) { width: 160px; }
   function clearAllFilters() {
     elements.lastNameSearch.value = "";
     elements.firstNameSearch.value = "";
-    elements.matchExactName.checked = false;
+elements.masterNameSearch.checked = false;
 
     elements.titleSearch.value = "";
     elements.journalSearch.value = "";
@@ -977,20 +995,21 @@ th:nth-child(2), td:nth-child(2) { width: 160px; }
   }
 
   function attachListeners() {
-    [
-      elements.lastNameSearch,
-      elements.firstNameSearch,
-      elements.matchExactName,
-      elements.titleSearch,
-      elements.journalSearch,
-      elements.utdYes,
-      elements.utdNo,
-      elements.ftYes,
-      elements.ftNo,
-      elements.rank4,
-      elements.rank5,
-      elements.rank5star
-    ].forEach(el => el.addEventListener("input", applyFilters));
+  [
+  elements.lastNameSearch,
+  elements.firstNameSearch,
+  elements.masterNameSearch,   
+  elements.titleSearch,
+  elements.journalSearch,
+  elements.utdYes,
+  elements.utdNo,
+  elements.ftYes,
+  elements.ftNo,
+  elements.rank4,
+  elements.rank5,
+  elements.rank5star
+].forEach(el => el.addEventListener("input", applyFilters));
+
 
     if (elements.clearFilters) {
       elements.clearFilters.addEventListener("click", clearAllFilters);

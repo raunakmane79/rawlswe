@@ -258,7 +258,6 @@
       color: #444;
     }
 
-    /* New: name inputs row + exact match checkbox */
     .name-inputs {
       display: flex;
       gap: 8px;
@@ -476,7 +475,7 @@
   </div>
 
   <div class="filters">
-    <!-- UPDATED: Author Name split into Last / First + Exact match -->
+    <!-- Author Name split into Last / First + Exact match -->
     <div class="filter-group">
       <label>Author Name</label>
       <div class="name-inputs">
@@ -554,22 +553,21 @@
 
   <div class="table-container">
     <table>
-     <thead>
-  <tr>
-    <th>Person</th>
-    <th>Last Name</th>
-    <th>First Name</th>
-    <th>Position</th>
-    <th>Area</th>
-    <th>Year</th>
-    <th>Article Title</th>
-    <th>Journal</th>
-    <th>Ranking</th>
-    <th>UTD</th>
-    <th>Financial Times</th>
-  </tr>
-</thead>
-
+      <thead>
+        <tr>
+          <th>Person</th>
+          <th>Last Name</th>
+          <th>First Name</th>
+          <th>Position</th>
+          <th>Area</th>
+          <th>Year</th>
+          <th>Article Title</th>
+          <th>Journal</th>
+          <th>Ranking</th>
+          <th>UTD</th>
+          <th>Financial Times</th>
+        </tr>
+      </thead>
       <tbody id="resultsBody"></tbody>
     </table>
   </div>
@@ -613,7 +611,6 @@
 
   function findSheetWithHeaders(workbook) {
     const targetHeaders = [
-      // kept simple; will still fall back to first sheet if these don't all match
       "position",
       "area",
       "year",
@@ -670,9 +667,25 @@
 
         data = json.map(row => {
           const r = normalizeRow(row);
-          const first = r["firstname"] || "";
-          const last = r["lastname"] || "";
-          const personName = [last, first].filter(Boolean).join(", ");
+
+          // Support multiple header variants: "lastname", "last name", "LastName", etc.
+          let first = r["firstname"] || r["first name"] || r["first"] || "";
+          let last  = r["lastname"] || r["last name"] || r["last"]  || "";
+          let personName = r["personname"] || "";
+
+          // If we only have personname like "ALLEN, JARED S", split it
+          if ((!first && !last) && personName) {
+            const parts = String(personName).split(",");
+            if (parts.length >= 2) {
+              last = parts[0].trim();
+              first = parts[1].trim();
+            }
+          }
+
+          // If no explicit personName, build it from last, first
+          if (!personName) {
+            personName = [last, first].filter(Boolean).join(", ");
+          }
 
           return {
             firstName: first,
@@ -680,7 +693,7 @@
             personName: personName,
             position: r["position"] || "",
             area: r["area"] || "",
-            year: r["year"] || "",
+            year: String(r["year"] || "").trim(),
             articleTitle: r["articletitle"] || "",
             journalName: r["journalname"] || "",
             ranking: String(r["ranking - updated"] || "").trim(),
@@ -797,33 +810,37 @@
 
   /* -------- Table + Export ---------- */
 
- function renderTable(rows) {
-  currentRows = rows.slice();
+  function renderTable(rows) {
+    currentRows = rows.slice();
 
-  elements.resultsBody.innerHTML = "";
-  rows.forEach(r => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${r.lastName || ""}</td>
-      <td>${r.firstName || ""}</td>
-      <td>${r.position || ""}</td>
-      <td>${r.area || ""}</td>
-      <td>${r.year}</td>
-      <td>${r.articleTitle}</td>
-      <td>${r.journalName}</td>
-      <td>${r.ranking ? `<span class="badge badge-blue">${r.ranking}</span>` : ""}</td>
-      <td>${r.utdJournal === "Yes"
-        ? `<span class="badge badge-green">Yes</span>`
-        : (r.utdJournal === "No" ? `<span class="badge badge-no">No</span>` : "")}</td>
-      <td>${r.ftJournal === "Yes"
-        ? `<span class="badge badge-green">Yes</span>`
-        : (r.ftJournal === "No" ? `<span class="badge badge-no">No</span>` : "")}</td>
-    `;
-    elements.resultsBody.appendChild(tr);
-  });
-  elements.resultsCount.textContent = `Showing ${rows.length} results`;
-}
-
+    elements.resultsBody.innerHTML = "";
+    rows.forEach(r => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${r.personName || ""}</td>
+        <td>${r.lastName || ""}</td>
+        <td>${r.firstName || ""}</td>
+        <td>${r.position || ""}</td>
+        <td>${r.area || ""}</td>
+        <td>${r.year || ""}</td>
+        <td>${r.articleTitle || ""}</td>
+        <td>${r.journalName || ""}</td>
+        <td>${r.ranking ? `<span class="badge badge-blue">${r.ranking}</span>` : ""}</td>
+        <td>${
+          r.utdJournal === "Yes"
+            ? `<span class="badge badge-green">Yes</span>`
+            : (r.utdJournal === "No" ? `<span class="badge badge-no">No</span>` : "")
+        }</td>
+        <td>${
+          r.ftJournal === "Yes"
+            ? `<span class="badge badge-green">Yes</span>`
+            : (r.ftJournal === "No" ? `<span class="badge badge-no">No</span>` : "")
+        }</td>
+      `;
+      elements.resultsBody.appendChild(tr);
+    });
+    elements.resultsCount.textContent = `Showing ${rows.length} results`;
+  }
 
   function exportFilteredToExcel() {
     if (!currentRows || currentRows.length === 0) {
@@ -833,8 +850,8 @@
 
     const exportData = currentRows.map(r => ({
       "Person": r.personName,
-      "First Name": r.firstName,
       "Last Name": r.lastName,
+      "First Name": r.firstName,
       "Position": r.position,
       "Area": r.area,
       "Year": r.year,

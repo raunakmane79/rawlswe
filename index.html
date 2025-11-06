@@ -275,6 +275,20 @@
       align-items: center;
       gap: 6px;
     }
+.name-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
+  font-size: 0.8rem;
+  color: #555;
+}
+
+.name-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
 
     /* --- Custom multi-select dropdown with checkboxes --- */
     .multi-select {
@@ -502,10 +516,16 @@ th:nth-child(2), td:nth-child(2) { width: 160px; }
     <input type="text" id="lastNameSearch" placeholder="First name">
     <input type="text" id="firstNameSearch" placeholder="Last name">
   </div>
-  <label class="name-exact">
-  <input type="checkbox" id="masterNameSearch">
-  Master search
-</label>
+  <div class="name-options">
+  <label class="name-option">
+    <input type="checkbox" id="masterNameSearch">
+    Master search
+  </label>
+  <label class="name-option">
+    <input type="checkbox" id="exactNameMatch">
+    Match entire cell contents
+  </label>
+</div>
 </div>
 
     <div class="filter-group">
@@ -597,9 +617,10 @@ th:nth-child(2), td:nth-child(2) { width: 160px; }
   let currentRows = [];
 
   const elements = {
-    lastNameSearch: document.getElementById("lastNameSearch"),
-    firstNameSearch: document.getElementById("firstNameSearch"),
-masterNameSearch: document.getElementById("masterNameSearch"),
+  lastNameSearch: document.getElementById("lastNameSearch"),
+  firstNameSearch: document.getElementById("firstNameSearch"),
+  masterNameSearch: document.getElementById("masterNameSearch"),
+  exactNameMatch: document.getElementById("exactNameMatch"),
     titleSearch: document.getElementById("titleSearch"),
     journalSearch: document.getElementById("journalSearch"),
     utdYes: document.getElementById("utdYes"),
@@ -890,9 +911,10 @@ masterNameSearch: document.getElementById("masterNameSearch"),
   /* -------- Filtering ---------- */
 
   function applyFilters() {
-    const lnq = elements.lastNameSearch.value.trim().toLowerCase();
-const fnq = elements.firstNameSearch.value.trim().toLowerCase();
-const masterSearch = elements.masterNameSearch.checked;
+  const lnq = elements.lastNameSearch.value.trim().toLowerCase();
+  const fnq = elements.firstNameSearch.value.trim().toLowerCase();
+  const masterSearch = elements.masterNameSearch.checked;
+  const exactMatch = elements.exactNameMatch.checked;
 
 
     const tq = elements.titleSearch.value.toLowerCase();
@@ -906,7 +928,52 @@ const masterSearch = elements.masterNameSearch.checked;
     const ftY = elements.ftYes.checked, ftN = elements.ftNo.checked;
     const r4 = elements.rank4.checked, r5 = elements.rank5.checked, r5s = elements.rank5star.checked;
 
-    const filtered = data.filter(d => {
+const filtered = data.filter(d => {
+      const ln = (d.lastName || "").toLowerCase();
+      const fn = (d.firstName || "").toLowerCase();
+
+      // LAST NAME INPUT
+      if (lnq) {
+        if (masterSearch) {
+          if (exactMatch) {
+            // exact match in EITHER column
+            if (ln !== lnq && fn !== lnq) return false;
+          } else {
+            // partial match in either column
+            if (!ln.includes(lnq) && !fn.includes(lnq)) return false;
+          }
+        } else {
+          if (exactMatch) {
+            // exact match in last name only
+            if (ln !== lnq) return false;
+          } else {
+            // partial match in last name only
+            if (!ln.includes(lnq)) return false;
+          }
+        }
+      }
+
+      // FIRST NAME INPUT
+      if (fnq) {
+        if (masterSearch) {
+          if (exactMatch) {
+            // exact match in EITHER column
+            if (fn !== fnq && ln !== fnq) return false;
+          } else {
+            // partial match in either column
+            if (!fn.includes(fnq) && !ln.includes(fnq)) return false;
+          }
+        } else {
+          if (exactMatch) {
+            // exact match in first name only
+            if (fn !== fnq) return false;
+          } else {
+            // partial match in first name only
+            if (!fn.includes(fnq)) return false;
+          }
+        }
+      }
+
     // Last name input
 if (lnq) {
   const ln = (d.lastName || "").toLowerCase();
@@ -975,6 +1042,8 @@ if (fnq) {
     elements.lastNameSearch.value = "";
     elements.firstNameSearch.value = "";
 elements.masterNameSearch.checked = false;
+elements.exactNameMatch.checked = false;
+
 
     elements.titleSearch.value = "";
     elements.journalSearch.value = "";
@@ -995,10 +1064,11 @@ elements.masterNameSearch.checked = false;
   }
 
   function attachListeners() {
-  [
+ [
   elements.lastNameSearch,
   elements.firstNameSearch,
-  elements.masterNameSearch,   
+  elements.masterNameSearch,
+  elements.exactNameMatch,
   elements.titleSearch,
   elements.journalSearch,
   elements.utdYes,
@@ -1009,6 +1079,7 @@ elements.masterNameSearch.checked = false;
   elements.rank5,
   elements.rank5star
 ].forEach(el => el.addEventListener("input", applyFilters));
+
 
 
     if (elements.clearFilters) {

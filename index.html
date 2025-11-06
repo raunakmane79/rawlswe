@@ -368,8 +368,10 @@
       overflow: hidden;
     }
 
-    th:nth-child(2), td:nth-child(2) { width: 140px; }
-    th:nth-child(3), td:nth-child(3) { width: 160px; }
+   
+th:nth-child(1), td:nth-child(1) { width: 140px; }
+th:nth-child(2), td:nth-child(2) { width: 160px; }
+
 
     th, td {
       padding: 10px 12px;
@@ -573,9 +575,8 @@
     <table>
       <thead>
         <tr>
-          <th>Person</th>
-          <th>Last Name</th>
           <th>First Name</th>
+          <th>Last Name</th>
           <th>Position</th>
           <th>Area</th>
           <th>Year</th>
@@ -828,64 +829,63 @@
 
   /* -------- Table + Export ---------- */
 
-  function renderTable(rows) {
-    currentRows = rows.slice();
+ function renderTable(rows) {
+  currentRows = rows.slice();
 
-    elements.resultsBody.innerHTML = "";
-    rows.forEach(r => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${r.personName || ""}</td>
-        <td>${r.lastName || ""}</td>
-        <td>${r.firstName || ""}</td>
-        <td>${r.position || ""}</td>
-        <td>${r.area || ""}</td>
-        <td>${r.year || ""}</td>
-        <td>${r.articleTitle || ""}</td>
-        <td>${r.journalName || ""}</td>
-        <td>${r.ranking ? `<span class="badge badge-blue">${r.ranking}</span>` : ""}</td>
-        <td>${
-          r.utdJournal === "Yes"
-            ? `<span class="badge badge-green">Yes</span>`
-            : (r.utdJournal === "No" ? `<span class="badge badge-no">No</span>` : "")
-        }</td>
-        <td>${
-          r.ftJournal === "Yes"
-            ? `<span class="badge badge-green">Yes</span>`
-            : (r.ftJournal === "No" ? `<span class="badge badge-no">No</span>` : "")
-        }</td>
-      `;
-      elements.resultsBody.appendChild(tr);
-    });
-    elements.resultsCount.textContent = `Showing ${rows.length} results`;
+  elements.resultsBody.innerHTML = "";
+  rows.forEach(r => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${r.lastName || ""}</td>
+      <td>${r.firstName || ""}</td>
+      <td>${r.position || ""}</td>
+      <td>${r.area || ""}</td>
+      <td>${r.year || ""}</td>
+      <td>${r.articleTitle || ""}</td>
+      <td>${r.journalName || ""}</td>
+      <td>${r.ranking ? `<span class="badge badge-blue">${r.ranking}</span>` : ""}</td>
+      <td>${
+        r.utdJournal === "Yes"
+          ? `<span class="badge badge-green">Yes</span>`
+          : (r.utdJournal === "No" ? `<span class="badge badge-no">No</span>` : "")
+      }</td>
+      <td>${
+        r.ftJournal === "Yes"
+          ? `<span class="badge badge-green">Yes</span>`
+          : (r.ftJournal === "No" ? `<span class="badge badge-no">No</span>` : "")
+      }</td>
+    `;
+    elements.resultsBody.appendChild(tr);
+  });
+  elements.resultsCount.textContent = `Showing ${rows.length} results`;
+}
+
+
+ function exportFilteredToExcel() {
+  if (!currentRows || currentRows.length === 0) {
+    alert("There are no rows to export.");
+    return;
   }
 
-  function exportFilteredToExcel() {
-    if (!currentRows || currentRows.length === 0) {
-      alert("There are no rows to export.");
-      return;
-    }
+  const exportData = currentRows.map(r => ({
+    "Last Name": r.lastName,
+    "First Name": r.firstName,
+    "Position": r.position,
+    "Area": r.area,
+    "Year": r.year,
+    "Article Title": r.articleTitle,
+    "Journal": r.journalName,
+    "Ranking": r.ranking,
+    "UTD Journal": r.utdJournal,
+    "Financial Times Journal": r.ftJournal,
+  }));
 
-    const exportData = currentRows.map(r => ({
-      "Person": r.personName,
-      "Last Name": r.lastName,
-      "First Name": r.firstName,
-      "Position": r.position,
-      "Area": r.area,
-      "Year": r.year,
-      "Article Title": r.articleTitle,
-      "Journal": r.journalName,
-      "Ranking": r.ranking,
-      "UTD Journal": r.utdJournal,
-      "Financial Times Journal": r.ftJournal,
-    }));
+  const ws = XLSX.utils.json_to_sheet(exportData);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Filtered Results");
 
-    const ws = XLSX.utils.json_to_sheet(exportData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Filtered Results");
-
-    XLSX.writeFile(wb, "Rawls_Publications_Filtered.xlsx");
-  }
+  XLSX.writeFile(wb, "Rawls_Publications_Filtered.xlsx");
+}
 
   /* -------- Filtering ---------- */
 

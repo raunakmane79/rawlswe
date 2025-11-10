@@ -670,6 +670,33 @@
       border-color: var(--rawls-red-dark);
       color: #fff;
     }
+    /* Base state = expanded (shaded) */
+.filters-advanced {
+  margin-top: 0.75rem;
+  padding: 1rem 1.5rem 1.25rem;
+  border-radius: 12px;
+  background: rgba(186, 12, 47, 0.04); /* light TTU Rawls red */
+  box-shadow: 0 0 0 1px rgba(186, 12, 47, 0.10);
+  border-top: 1px dashed #e5e5e5;
+  max-height: 800px; /* or whatever fits your content */
+  overflow: hidden;
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    max-height 0.25s ease,
+    padding 0.25s ease;
+}
+
+/* Collapsed = hidden + no shading */
+.filters-advanced.collapsed {
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  background: transparent;
+  box-shadow: none;
+  border-top: 1px dashed transparent;
+}
+
   </style>
 </head>
 

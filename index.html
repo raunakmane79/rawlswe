@@ -529,6 +529,86 @@
       outline: none;
       box-shadow: 0 0 0 2px rgba(186, 12, 47, 0.4);
     }
+
+    /* --- Export modal --- */
+    .export-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.35);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+
+    .export-modal.active {
+      display: flex;
+    }
+
+    .export-modal-content {
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 18px 20px 16px;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.25);
+      max-width: 340px;
+      width: 90%;
+    }
+
+    .export-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .export-modal-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .export-modal-close {
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 2px 4px;
+      color: #6b7280;
+    }
+
+    .export-modal-close:hover {
+      color: #111827;
+    }
+
+    .export-modal-body {
+      font-size: 0.85rem;
+      color: #4b5563;
+      margin-bottom: 10px;
+    }
+
+    .export-modal-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .export-option-btn {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .export-option-btn.primary {
+      background: var(--rawls-red);
+      border-color: var(--rawls-red);
+      color: #fff;
+    }
+
+    .export-option-btn.primary:hover {
+      background: var(--rawls-red-dark);
+      border-color: var(--rawls-red-dark);
+      color: #fff;
+    }
   </style>
 </head>
 
@@ -600,7 +680,7 @@
       </div>
     </div>
 
-    <!-- NEW: Keyword search across Title & Journal -->
+    <!-- Keyword search across Title & Journal -->
     <div class="filter-group">
       <label>Keyword (Title / Journal)</label>
       <input type="text" id="keywordSearch" placeholder="Search in title or journal">
@@ -690,6 +770,30 @@
   </div>
 </div>
 
+<!-- Export options modal -->
+<div class="export-modal" id="exportModal">
+  <div class="export-modal-content">
+    <div class="export-modal-header">
+      <div class="export-modal-title">Export search results</div>
+      <button class="export-modal-close" id="exportModalClose" aria-label="Close export options">✕</button>
+    </div>
+    <div class="export-modal-body">
+      Choose how you would like to export the current filtered results.
+    </div>
+    <div class="export-modal-actions">
+      <button class="btn export-option-btn primary" id="exportXlsx">
+        Export Data as XLSX
+      </button>
+      <button class="btn export-option-btn" id="exportCsv">
+        Export Data as CSV
+      </button>
+      <button class="btn export-option-btn" id="exportSummary">
+        Export Summary Only (XLSX)
+      </button>
+    </div>
+  </div>
+</div>
+
 <script>
   let data = [];
   let currentRows = [];
@@ -699,7 +803,7 @@
     firstNameSearch: document.getElementById("firstNameSearch"),
     masterNameSearch: document.getElementById("masterNameSearch"),
     exactNameMatch: document.getElementById("exactNameMatch"),
-    keywordSearch: document.getElementById("keywordSearch"), // NEW
+    keywordSearch: document.getElementById("keywordSearch"),
     titleSearch: document.getElementById("titleSearch"),
     journalSearch: document.getElementById("journalSearch"),
     utdYes: document.getElementById("utdYes"),
@@ -716,6 +820,12 @@
     areaMulti: document.getElementById("areaMulti"),
     positionMulti: document.getElementById("positionMulti"),
     yearMulti: document.getElementById("yearMulti"),
+    // Modal elements
+    exportModal: document.getElementById("exportModal"),
+    exportModalClose: document.getElementById("exportModalClose"),
+    exportXlsx: document.getElementById("exportXlsx"),
+    exportCsv: document.getElementById("exportCsv"),
+    exportSummary: document.getElementById("exportSummary"),
   };
 
   const multiSelectControls = {};
@@ -965,16 +1075,15 @@
     return parts.join(", ");
   }
 
-  // NEW: export with reporting / summaries
-  function exportFilteredToExcel() {
+  // --- Export helpers ---
+
+  // 1) Data as XLSX (only detailed rows)
+  function exportDataAsXlsx() {
     if (!currentRows || currentRows.length === 0) {
       alert("There are no rows to export.");
       return;
     }
 
-    const wb = XLSX.utils.book_new();
-
-    // 1) Detailed filtered results
     const exportData = currentRows.map(r => ({
       "Last Name": r.lastName,
       "First Name": r.firstName,
@@ -988,10 +1097,59 @@
       "UTD Journal": r.utdJournal,
       "Financial Times Journal": r.ftJournal,
     }));
-    const wsDetails = XLSX.utils.json_to_sheet(exportData);
-    XLSX.utils.book_append_sheet(wb, wsDetails, "Filtered_Results");
 
-    // 2) Summary overview
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Filtered_Results");
+    XLSX.writeFile(wb, "Rawls_Publications_Filtered.xlsx");
+  }
+
+  // 2) Data as CSV
+  function exportDataAsCsv() {
+    if (!currentRows || currentRows.length === 0) {
+      alert("There are no rows to export.");
+      return;
+    }
+
+    const exportData = currentRows.map(r => ({
+      "Last Name": r.lastName,
+      "First Name": r.firstName,
+      "Faculty (Display)": getFacultyName(r),
+      "Position": r.position,
+      "Area": r.area,
+      "Year": r.year,
+      "Article Title": r.articleTitle,
+      "Journal": r.journalName,
+      "Ranking": r.ranking,
+      "UTD Journal": r.utdJournal,
+      "Financial Times Journal": r.ftJournal,
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const csv = XLSX.utils.sheet_to_csv(ws);
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "Rawls_Publications_Filtered.csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
+  // 3) Summary only (multiple sheets, no detailed rows)
+  function exportSummaryOnly() {
+    if (!currentRows || currentRows.length === 0) {
+      alert("There are no rows to summarize.");
+      return;
+    }
+
+    const wb = XLSX.utils.book_new();
+
+    // Overview
     const facultySet = new Set();
     const yearSet = new Set();
     const areaSet = new Set();
@@ -1012,7 +1170,7 @@
     const wsOverview = XLSX.utils.json_to_sheet(overview);
     XLSX.utils.book_append_sheet(wb, wsOverview, "Summary_Overview");
 
-    // 3) Articles per faculty
+    // Articles per faculty
     const facultySummary = {};
     currentRows.forEach(r => {
       const f = getFacultyName(r);
@@ -1028,7 +1186,7 @@
     const wsByFaculty = XLSX.utils.json_to_sheet(facultyRows);
     XLSX.utils.book_append_sheet(wb, wsByFaculty, "By_Faculty");
 
-    // 4) Articles per year
+    // Articles per year
     const yearSummary = {};
     currentRows.forEach(r => {
       const y = r.year || "";
@@ -1044,7 +1202,7 @@
     const wsByYear = XLSX.utils.json_to_sheet(yearRows);
     XLSX.utils.book_append_sheet(wb, wsByYear, "By_Year");
 
-    // 5) Articles per area & year
+    // Articles per area & year
     const areaYearSummary = {};
     currentRows.forEach(r => {
       const a = r.area || "";
@@ -1071,7 +1229,7 @@
     const wsByAreaYear = XLSX.utils.json_to_sheet(areaYearRows);
     XLSX.utils.book_append_sheet(wb, wsByAreaYear, "By_Area_Year");
 
-    // 6) Articles per faculty & year
+    // Articles per faculty & year
     const facultyYearSummary = {};
     currentRows.forEach(r => {
       const f = getFacultyName(r);
@@ -1098,7 +1256,7 @@
     const wsByFacYear = XLSX.utils.json_to_sheet(facultyYearRows);
     XLSX.utils.book_append_sheet(wb, wsByFacYear, "By_Faculty_Year");
 
-    // 7) Articles per category (5*, 5, UTD, FT) & per year & per area & per faculty
+    // Articles per category (5*, 5, UTD, FT) & per year & per area & per faculty
     const catSummary = {};
     currentRows.forEach(r => {
       const categories = [];
@@ -1134,8 +1292,7 @@
     const wsByCat = XLSX.utils.json_to_sheet(catRows);
     XLSX.utils.book_append_sheet(wb, wsByCat, "By_Category_Area_Year_Fac");
 
-    // Finally download
-    XLSX.writeFile(wb, "Rawls_Publications_Filtered_Reports.xlsx");
+    XLSX.writeFile(wb, "Rawls_Publications_Summary.xlsx");
   }
 
   function applyFilters() {
@@ -1144,7 +1301,7 @@
     const masterSearch = elements.masterNameSearch.checked;
     const exactMatch = elements.exactNameMatch.checked;
 
-    const kq = elements.keywordSearch.value.toLowerCase(); // NEW keyword across title & journal
+    const kq = elements.keywordSearch.value.toLowerCase();
     const tq = elements.titleSearch.value.toLowerCase();
     const jq = elements.journalSearch.value.toLowerCase();
 
@@ -1192,7 +1349,6 @@
         }
       }
 
-      // NEW: keyword across title OR journal
       if (kq) {
         const inTitle = (d.articleTitle || "").toLowerCase().includes(kq);
         const inJournal = (d.journalName || "").toLowerCase().includes(kq);
@@ -1235,7 +1391,7 @@
     elements.masterNameSearch.checked = false;
     elements.exactNameMatch.checked = false;
 
-    elements.keywordSearch.value = ""; // NEW clear keyword
+    elements.keywordSearch.value = "";
     elements.titleSearch.value = "";
     elements.journalSearch.value = "";
 
@@ -1254,13 +1410,21 @@
     renderTable(data);
   }
 
+  function openExportModal() {
+    elements.exportModal.classList.add("active");
+  }
+
+  function closeExportModal() {
+    elements.exportModal.classList.remove("active");
+  }
+
   function attachListeners() {
     [
       elements.lastNameSearch,
       elements.firstNameSearch,
       elements.masterNameSearch,
       elements.exactNameMatch,
-      elements.keywordSearch, // NEW
+      elements.keywordSearch,
       elements.titleSearch,
       elements.journalSearch,
       elements.utdYes,
@@ -1276,8 +1440,45 @@
       elements.clearFilters.addEventListener("click", clearAllFilters);
     }
 
+    // Open modal on export button click
     if (elements.exportExcel) {
-      elements.exportExcel.addEventListener("click", exportFilteredToExcel);
+      elements.exportExcel.addEventListener("click", openExportModal);
+    }
+
+    // Modal close button
+    if (elements.exportModalClose) {
+      elements.exportModalClose.addEventListener("click", closeExportModal);
+    }
+
+    // Close when clicking outside content
+    if (elements.exportModal) {
+      elements.exportModal.addEventListener("click", (e) => {
+        if (e.target === elements.exportModal) {
+          closeExportModal();
+        }
+      });
+    }
+
+    // Export option buttons
+    if (elements.exportXlsx) {
+      elements.exportXlsx.addEventListener("click", () => {
+        exportDataAsXlsx();
+        closeExportModal();
+      });
+    }
+
+    if (elements.exportCsv) {
+      elements.exportCsv.addEventListener("click", () => {
+        exportDataAsCsv();
+        closeExportModal();
+      });
+    }
+
+    if (elements.exportSummary) {
+      elements.exportSummary.addEventListener("click", () => {
+        exportSummaryOnly();
+        closeExportModal();
+      });
     }
   }
 </script>
@@ -1299,5 +1500,4 @@
 
 </body>
 </html>
-
 

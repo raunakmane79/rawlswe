@@ -671,27 +671,38 @@
       color: #fff;
     }
     /* Enhanced TTU-styled advanced filter panel */
+/* TTU-themed, elevated advanced filter panel */
 .filters-advanced {
   margin-top: 0.75rem;
   padding: 1rem 1.5rem 1.25rem;
-  border-radius: 12px;
+  border-radius: 14px;
   background: linear-gradient(
     180deg,
-    rgba(186, 12, 47, 0.05) 0%,
-    rgba(186, 12, 47, 0.02) 100%
-  ); /* TTU crimson fade */
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08),
-              0 0 0 1px rgba(186, 12, 47, 0.12);
-  border-top: 2px solid rgba(186, 12, 47, 0.25);
-  backdrop-filter: blur(4px);
+    rgba(186, 12, 47, 0.08) 0%,
+    rgba(186, 12, 47, 0.01) 100%
+  ); /* soft Rawls crimson wash */
+  border: 1px solid rgba(186, 12, 47, 0.25);
+  box-shadow:
+    0 6px 16px rgba(0, 0, 0, 0.06),
+    0 0 0 1px rgba(255, 255, 255, 0.6);
+  position: relative;
+  overflow: visible;              /* <-- IMPORTANT: lets dropdown extend */
   transition:
-    background 0.3s ease,
-    box-shadow 0.3s ease,
-    transform 0.3s ease,
-    max-height 0.25s ease,
-    padding 0.25s ease;
-  max-height: 900px;
-  overflow: hidden;
+    background 0.25s ease,
+    box-shadow 0.25s ease,
+    transform 0.2s ease;
+}
+
+.filters-advanced:hover {
+  background: linear-gradient(
+    180deg,
+    rgba(186, 12, 47, 0.1) 0%,
+    rgba(186, 12, 47, 0.02) 100%
+  );
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.08),
+    0 0 0 1px rgba(186, 12, 47, 0.25);
+  transform: translateY(-1px);    /* slight lift */
 }
 
 /* Soft hover / open glow */
@@ -708,12 +719,9 @@
 
 /* Collapsed = hidden and flat */
 .filters-advanced.collapsed {
-  max-height: 0;
+  display: none;
   padding-top: 0;
   padding-bottom: 0;
-  background: transparent;
-  box-shadow: none;
-  border-top: 1px dashed transparent;
 }
 
 

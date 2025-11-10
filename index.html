@@ -48,7 +48,7 @@
     .rawls-header-inner {
       display: flex;
       align-items: center;
-      justify-content: space-between; /* NEW: space for buttons on right */
+      justify-content: space-between;
       gap: 16px;
       max-width: 1320px;
       margin: 0 auto;
@@ -90,7 +90,7 @@
       text-transform: uppercase;
     }
 
-    /* --- NEW: header action buttons --- */
+    /* --- Header action buttons --- */
     .rawls-header-actions {
       display: flex;
       gap: 10px;
@@ -328,15 +328,6 @@
       min-width: 0;
     }
 
-    .name-exact {
-      font-size: 0.8rem;
-      color: #555;
-      margin-top: 2px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
     .name-options {
       display: flex;
       flex-wrap: wrap;
@@ -554,7 +545,6 @@
       </div>
     </div>
 
-    <!-- NEW: header buttons -->
     <div class="rawls-header-actions">
       <a
         href="https://docs.google.com/forms/d/e/1FAIpQLSfPr71g-Bngv3rWphXkBO1MmLOaNJZeY8T5OxKwyVPf_0dhCg/viewform"
@@ -608,6 +598,12 @@
           Match entire cell contents
         </label>
       </div>
+    </div>
+
+    <!-- NEW: Keyword search across Title & Journal -->
+    <div class="filter-group">
+      <label>Keyword (Title / Journal)</label>
+      <input type="text" id="keywordSearch" placeholder="Search in title or journal">
     </div>
 
     <div class="filter-group">
@@ -703,6 +699,7 @@
     firstNameSearch: document.getElementById("firstNameSearch"),
     masterNameSearch: document.getElementById("masterNameSearch"),
     exactNameMatch: document.getElementById("exactNameMatch"),
+    keywordSearch: document.getElementById("keywordSearch"), // NEW
     titleSearch: document.getElementById("titleSearch"),
     journalSearch: document.getElementById("journalSearch"),
     utdYes: document.getElementById("utdYes"),
@@ -951,15 +948,37 @@
     elements.resultsCount.textContent = `Showing ${rows.length} results`;
   }
 
+  // Helper to get a nice faculty display name
+  function getFacultyName(row) {
+    if (row.personName && row.personName.trim()) {
+      return row.personName.trim();
+    }
+    const parts = [];
+    if (row.lastName) parts.push(row.lastName);
+    if (row.firstName) {
+      if (parts.length) {
+        parts.push(row.firstName);
+      } else {
+        parts.push(row.firstName);
+      }
+    }
+    return parts.join(", ");
+  }
+
+  // NEW: export with reporting / summaries
   function exportFilteredToExcel() {
     if (!currentRows || currentRows.length === 0) {
       alert("There are no rows to export.");
       return;
     }
 
+    const wb = XLSX.utils.book_new();
+
+    // 1) Detailed filtered results
     const exportData = currentRows.map(r => ({
       "Last Name": r.lastName,
       "First Name": r.firstName,
+      "Faculty (Display)": getFacultyName(r),
       "Position": r.position,
       "Area": r.area,
       "Year": r.year,
@@ -969,12 +988,154 @@
       "UTD Journal": r.utdJournal,
       "Financial Times Journal": r.ftJournal,
     }));
+    const wsDetails = XLSX.utils.json_to_sheet(exportData);
+    XLSX.utils.book_append_sheet(wb, wsDetails, "Filtered_Results");
 
-    const ws = XLSX.utils.json_to_sheet(exportData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Filtered Results");
+    // 2) Summary overview
+    const facultySet = new Set();
+    const yearSet = new Set();
+    const areaSet = new Set();
 
-    XLSX.writeFile(wb, "Rawls_Publications_Filtered.xlsx");
+    currentRows.forEach(r => {
+      const faculty = getFacultyName(r);
+      if (faculty) facultySet.add(faculty);
+      if (r.year) yearSet.add(r.year);
+      if (r.area) areaSet.add(r.area);
+    });
+
+    const overview = [
+      { Metric: "Total articles (filtered)", Value: currentRows.length },
+      { Metric: "Distinct faculty (filtered)", Value: facultySet.size },
+      { Metric: "Distinct years (filtered)", Value: yearSet.size },
+      { Metric: "Distinct areas (filtered)", Value: areaSet.size },
+    ];
+    const wsOverview = XLSX.utils.json_to_sheet(overview);
+    XLSX.utils.book_append_sheet(wb, wsOverview, "Summary_Overview");
+
+    // 3) Articles per faculty
+    const facultySummary = {};
+    currentRows.forEach(r => {
+      const f = getFacultyName(r);
+      if (!f) return;
+      facultySummary[f] = (facultySummary[f] || 0) + 1;
+    });
+    const facultyRows = Object.keys(facultySummary)
+      .sort()
+      .map(name => ({
+        "Faculty": name,
+        "Total Articles": facultySummary[name],
+      }));
+    const wsByFaculty = XLSX.utils.json_to_sheet(facultyRows);
+    XLSX.utils.book_append_sheet(wb, wsByFaculty, "By_Faculty");
+
+    // 4) Articles per year
+    const yearSummary = {};
+    currentRows.forEach(r => {
+      const y = r.year || "";
+      if (!y) return;
+      yearSummary[y] = (yearSummary[y] || 0) + 1;
+    });
+    const yearRows = Object.keys(yearSummary)
+      .sort()
+      .map(y => ({
+        "Year": y,
+        "Total Articles": yearSummary[y],
+      }));
+    const wsByYear = XLSX.utils.json_to_sheet(yearRows);
+    XLSX.utils.book_append_sheet(wb, wsByYear, "By_Year");
+
+    // 5) Articles per area & year
+    const areaYearSummary = {};
+    currentRows.forEach(r => {
+      const a = r.area || "";
+      const y = r.year || "";
+      if (!a || !y) return;
+      if (!areaYearSummary[a]) areaYearSummary[a] = {};
+      if (!areaYearSummary[a][y]) areaYearSummary[a][y] = 0;
+      areaYearSummary[a][y]++;
+    });
+    const areaYearRows = [];
+    Object.keys(areaYearSummary)
+      .sort()
+      .forEach(a => {
+        Object.keys(areaYearSummary[a])
+          .sort()
+          .forEach(y => {
+            areaYearRows.push({
+              "Area": a,
+              "Year": y,
+              "Total Articles": areaYearSummary[a][y],
+            });
+          });
+      });
+    const wsByAreaYear = XLSX.utils.json_to_sheet(areaYearRows);
+    XLSX.utils.book_append_sheet(wb, wsByAreaYear, "By_Area_Year");
+
+    // 6) Articles per faculty & year
+    const facultyYearSummary = {};
+    currentRows.forEach(r => {
+      const f = getFacultyName(r);
+      const y = r.year || "";
+      if (!f || !y) return;
+      if (!facultyYearSummary[f]) facultyYearSummary[f] = {};
+      if (!facultyYearSummary[f][y]) facultyYearSummary[f][y] = 0;
+      facultyYearSummary[f][y]++;
+    });
+    const facultyYearRows = [];
+    Object.keys(facultyYearSummary)
+      .sort()
+      .forEach(f => {
+        Object.keys(facultyYearSummary[f])
+          .sort()
+          .forEach(y => {
+            facultyYearRows.push({
+              "Faculty": f,
+              "Year": y,
+              "Total Articles": facultyYearSummary[f][y],
+            });
+          });
+      });
+    const wsByFacYear = XLSX.utils.json_to_sheet(facultyYearRows);
+    XLSX.utils.book_append_sheet(wb, wsByFacYear, "By_Faculty_Year");
+
+    // 7) Articles per category (5*, 5, UTD, FT) & per year & per area & per faculty
+    const catSummary = {};
+    currentRows.forEach(r => {
+      const categories = [];
+      if (r.ranking === "5*") categories.push("5*");
+      if (r.ranking === "5") categories.push("5");
+      if (r.utdJournal === "Yes") categories.push("UTD");
+      if (r.ftJournal === "Yes") categories.push("FT");
+
+      const a = r.area || "";
+      const y = r.year || "";
+      const f = getFacultyName(r);
+
+      if (!a || !y || !f || categories.length === 0) return;
+
+      categories.forEach(cat => {
+        const key = `${cat}||${a}||${y}||${f}`;
+        catSummary[key] = (catSummary[key] || 0) + 1;
+      });
+    });
+
+    const catRows = Object.keys(catSummary)
+      .sort()
+      .map(key => {
+        const [cat, area, year, faculty] = key.split("||");
+        return {
+          "Category (5*,5,UTD,FT)": cat,
+          "Area": area,
+          "Year": year,
+          "Faculty": faculty,
+          "Total Articles": catSummary[key],
+        };
+      });
+    const wsByCat = XLSX.utils.json_to_sheet(catRows);
+    XLSX.utils.book_append_sheet(wb, wsByCat, "By_Category_Area_Year_Fac");
+
+    // Finally download
+    XLSX.writeFile(wb, "Rawls_Publications_Filtered_Reports.xlsx");
   }
 
   function applyFilters() {
@@ -983,6 +1144,7 @@
     const masterSearch = elements.masterNameSearch.checked;
     const exactMatch = elements.exactNameMatch.checked;
 
+    const kq = elements.keywordSearch.value.toLowerCase(); // NEW keyword across title & journal
     const tq = elements.titleSearch.value.toLowerCase();
     const jq = elements.journalSearch.value.toLowerCase();
 
@@ -1030,6 +1192,13 @@
         }
       }
 
+      // NEW: keyword across title OR journal
+      if (kq) {
+        const inTitle = (d.articleTitle || "").toLowerCase().includes(kq);
+        const inJournal = (d.journalName || "").toLowerCase().includes(kq);
+        if (!inTitle && !inJournal) return false;
+      }
+
       if (tq && !d.articleTitle.toLowerCase().includes(tq)) return false;
       if (jq && !d.journalName.toLowerCase().includes(jq)) return false;
 
@@ -1066,6 +1235,7 @@
     elements.masterNameSearch.checked = false;
     elements.exactNameMatch.checked = false;
 
+    elements.keywordSearch.value = ""; // NEW clear keyword
     elements.titleSearch.value = "";
     elements.journalSearch.value = "";
 
@@ -1090,6 +1260,7 @@
       elements.firstNameSearch,
       elements.masterNameSearch,
       elements.exactNameMatch,
+      elements.keywordSearch, // NEW
       elements.titleSearch,
       elements.journalSearch,
       elements.utdYes,

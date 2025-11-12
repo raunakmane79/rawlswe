@@ -280,6 +280,44 @@
       border-color: var(--rawls-red);
       transform: translateY(-0.5px);
     }
+/* --- Toolbar buttons --- */
+.btn {
+  border-radius: 999px;
+  border: 1px solid var(--rawls-border);
+  padding: 5px 12px;
+  font-size: 0.8rem;
+  background: #f8f8f8;
+  color: #111;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+/* Hover = light red outline */
+.btn:hover {
+  background: #fff;
+  border-color: var(--rawls-red);
+  color: var(--rawls-red);
+  transform: translateY(-0.5px);
+}
+
+/* 🔴 Active (clicked) state */
+.btn:active,
+.btn.active {
+  background: var(--rawls-red);
+  border-color: var(--rawls-red-dark);
+  color: #fff;
+  box-shadow: 0 0 0 2px rgba(186, 12, 47, 0.25);
+  transform: scale(0.98);
+}
+
+/* Optional: pressed animation when you hold down the mouse */
+.btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(186, 12, 47, 0.35);
+}
 
     /* --- Filters container --- */
     .filters {
